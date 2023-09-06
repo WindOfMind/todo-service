@@ -1,30 +1,31 @@
 {
   "compilerOptions": {
     /* Language and Environment */
-    "target": "es2020",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    "target": "es2020",                                  
 
     /* Modules */
-    "module": "NodeNext",                                /* Specify what module code is generated. */
+    "module": "NodeNext",    
+    "rootDirs": ["src"],                          
     "outDir": "dist",
     "lib": ["es2020"],
-    "rootDirs": ["src"],
-    "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
-    "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
+    "esModuleInterop": true,                             
+    "forceConsistentCasingInFileNames": true,         
     "types": ["node", "express"],
+    "resolveJsonModule": true,
 
     /* Type Checking */
-    "strict": true,                                      /* Enable all strict type-checking options. */
-    "noImplicitAny": true,                            /* Enable error reporting for expressions and declarations with an implied 'any' type. */
-    "strictNullChecks": true,                         /* When type checking, take into account 'null' and 'undefined'. */
-    "strictFunctionTypes": true,                      /* When assigning functions, check to ensure parameters and the return values are subtype-compatible. */
-    "strictBindCallApply": true,                      /* Check that the arguments for 'bind', 'call', and 'apply' methods match the original function. */
-    "strictPropertyInitialization": true,             /* Check for class properties that are declared but not set in the constructor. */
-    "noImplicitThis": true,                           /* Enable error reporting when 'this' is given the type 'any'. */
-    "useUnknownInCatchVariables": true,               /* Default catch clause variables as 'unknown' instead of 'any'. */
-    "alwaysStrict": true,                             /* Ensure 'use strict' is always emitted. */
-    "noUnusedLocals": true,                           /* Enable error reporting when local variables aren't read. */
-    "noUnusedParameters": true,                       /* Raise an error when a function parameter isn't read. */
-    "noImplicitReturns": true,                        /* Enable error reporting for codepaths that do not explicitly return in a function. */
+    "strict": true,                                 
+    "noImplicitAny": true,                          
+    "strictNullChecks": true,                       
+    "strictFunctionTypes": true,                    
+    "strictBindCallApply": true,                    
+    "strictPropertyInitialization": true,           
+    "noImplicitThis": true,                         
+    "useUnknownInCatchVariables": true,             
+    "alwaysStrict": true,                           
+    "noUnusedLocals": false,                         
+    "noUnusedParameters": false,              
+    "noImplicitReturns": true,                      
     
     /* Completeness */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
