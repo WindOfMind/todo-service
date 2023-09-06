@@ -8,7 +8,7 @@ export interface Todo {
 
 export enum TodoStatus {
     ACTIVE = "active",
-    NONACTIVE = "nonactive"
+    INACTIVE = "inactive"
 }
 
 export interface TodoCreateParams {
@@ -25,6 +25,11 @@ export interface TodoDbRow {
     description: string | null;
     status: string;
     list_id: number | null;
+}
+
+export interface TodoUpdateParams {
+    listId?: number | null;
+    status?: TodoStatus;
 }
 
 export const fromDbRow = function (row: TodoDbRow) {

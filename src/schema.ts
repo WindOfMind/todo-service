@@ -1,24 +1,13 @@
-export const typeDefs = `#graphql
-    type List {
-        name: String
-    }
+import {listTypeDefs} from "./list/schema.js";
+import {todoMutations, todoQueries, todoTypeDefs} from "./todo/schema.js";
 
-    type Query {
-        lists: [List]
-    }
-`;
+export const typeDefs = [todoTypeDefs, listTypeDefs].join("");
 
 export const resolvers = {
     Query: {
-        lists: () => lists
+        ...todoQueries
+    },
+    Mutation: {
+        ...todoMutations
     }
 };
-
-const lists = [
-    {
-        name: "Today"
-    },
-    {
-        name: "Tomorrow"
-    }
-];
