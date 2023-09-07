@@ -17,7 +17,7 @@ export const todoTypeDefs = `#graphql
 
     type Mutation {
         addTodo(userId: Int!, title: String!, description: String, listId: Int): Todo
-        updateTodo(userId: Int!, todoId: ID!, status: TodoStatus!): Todo
+        completeTodo(userId: Int!, todoId: ID!): Todo
     }
 
     enum TodoStatus {
@@ -39,10 +39,9 @@ interface CreateTodoRequest {
     listId?: number;
 }
 
-interface UpdateTodoRequest {
+interface CompleteTodoRequest {
     userId: number;
     todoId: number;
-    status: TodoStatus;
 }
 
 export const todoQueries = {
@@ -61,7 +60,7 @@ export const todoMutations = {
             status: TodoStatus.ACTIVE
         });
     },
-    updateTodo: async (_: unknown, args: UpdateTodoRequest, contextValue: AppContext) => {
-        return todoService.updateTodo(contextValue.db, args.userId, args.todoId, {status: args.status});
+    completeTodo: async (_: unknown, args: CompleteTodoRequest, contextValue: AppContext) => {
+        return todoService.complete(contextValue.db, args.userId, args.todoId);
     }
 };

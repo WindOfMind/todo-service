@@ -1,7 +1,8 @@
 import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {todoTable} from "./todoTable.js";
-import {TodoCreateParams, TodoStatus, TodoUpdateParams, fromDbRow} from "./todo.js";
+import {TodoCreateParams, TodoStatus, fromDbRow} from "./todo.js";
+import {GraphQLError} from "graphql";
 
 const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCreateParams) {
     const id = await todoTable.add(db, createParams);
@@ -25,22 +26,20 @@ const getTodos = async function (db: IDatabase<IClient>, userId: number, status?
     return rows.map((row) => fromDbRow(row));
 };
 
-const updateTodo = async function (db: IDatabase<IClient>, userId: number, todoId: number, params: TodoUpdateParams) {
+const complete = async function (db: IDatabase<IClient>, userId: number, todoId: number) {
     const todo = await getTodo(db, userId, todoId);
     if (!todo) {
-        throw new Error(`Todo with ID = ${todoId} not found`);
+        throw new GraphQLError(`Todo with ID = ${todoId} not found`, {extensions: {code: "BAD_USER_INPUT"}});
     }
 
-    // check list
+    await todoTable.update(db, userId, todoId, {status: TodoStatus.INACTIVE});
 
-    await todoTable.update(db, userId, todoId, params);
-
-    return {...todo, ...params};
+    return {...todo, status: TodoStatus.INACTIVE};
 };
 
 export const todoService = {
     createTodo,
     getTodos,
     getTodo,
-    updateTodo
+    complete
 };
