@@ -6,7 +6,7 @@ const TABLE_NAME = "todo";
 
 const find = async function (db: IDatabase<IClient>, userId: number, where: TodoFilter): Promise<TodoDbRow[]> {
     const listCondition = where.listId ? `AND  list_id = ${where.listId}` : "";
-    const statusCondition = where.status ? `AND  status = ${where.status}` : "";
+    const statusCondition = where.status ? `AND  status = '${where.status}'` : "";
     const idsCondition = where.ids ? `AND todo_id IN (${where.ids.join(",")})` : "";
 
     const query = `
