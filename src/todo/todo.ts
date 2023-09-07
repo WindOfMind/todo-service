@@ -44,3 +44,6 @@ export const fromDbRow = function (row: TodoDbRow) {
         userId: row.user_id
     };
 };
+
+export const TITLE_MAX_LENGTH = 512;
+export const TITLE_MIN_LENGTH = 1;

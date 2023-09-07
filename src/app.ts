@@ -10,25 +10,6 @@ import pgPromise, {IMain, IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {AppContext} from "./context.js";
 import "dotenv/config";
-import winston from "winston";
-
-const logger = winston.createLogger({
-    level: "info",
-    format: winston.format.json(),
-    defaultMeta: {service: "todo-service"},
-    transports: [
-        new winston.transports.File({filename: "error.log", level: "error"}),
-        new winston.transports.File({filename: "combined.log"})
-    ]
-});
-
-if (process.env.NODE_ENV !== "production") {
-    logger.add(
-        new winston.transports.Console({
-            format: winston.format.simple()
-        })
-    );
-}
 
 const app: Express = express();
 const httpServer = http.createServer(app);
@@ -48,7 +29,7 @@ app.use(
     cors(),
     bodyParser.json(),
     expressMiddleware(server, {
-        context: async () => ({db, logger})
+        context: async () => ({db})
     })
 );
 

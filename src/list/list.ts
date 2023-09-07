@@ -19,3 +19,6 @@ export const fromDbRow = function (row: ListDbRow) {
         name: row.name
     };
 };
+
+export const NAME_MAX_LENGTH = 512;
+export const NAME_MIN_LENGTH = 1;

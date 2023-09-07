@@ -1,19 +1,27 @@
 import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {todoTable} from "./todoTable.js";
-import {TodoCreateParams, TodoStatus, fromDbRow} from "./todo.js";
-import {GraphQLError} from "graphql";
+import {TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, TodoCreateParams, TodoStatus, fromDbRow} from "./todo.js";
 import {listTable} from "../list/listTable.js";
+import {Logger} from "../logger.js";
+import {validateString} from "../utils/validation.js";
+
+const logger = Logger();
 
 const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCreateParams) {
     if (createParams.listId !== undefined) {
         const lists = await listTable.find(db, createParams.userId, [createParams.listId]);
 
         if (lists.length === 0) {
-            throw new GraphQLError(`List with ID = ${createParams.listId} not found`, {
-                extensions: {code: "BAD_USER_INPUT"}
-            });
+            logger.error(`List with ID = ${createParams.listId} not found`, {params: createParams});
+            throw new Error(`List with ID = ${createParams.listId} not found`);
         }
+    }
+
+    const validation = validateString(createParams.title, "Todo title", TITLE_MIN_LENGTH, TITLE_MAX_LENGTH);
+    if (validation.error) {
+        logger.error(`Cannot create new todo: ${validation.error}`, {params: createParams});
+        throw new Error(`Cannot create new todo: ${validation.error}`);
     }
 
     const id = await todoTable.add(db, createParams);
@@ -40,7 +48,8 @@ const getTodos = async function (db: IDatabase<IClient>, userId: number, status?
 const complete = async function (db: IDatabase<IClient>, userId: number, todoId: number) {
     const todo = await getTodo(db, userId, todoId);
     if (!todo) {
-        throw new GraphQLError(`Todo with ID = ${todoId} not found`, {extensions: {code: "BAD_USER_INPUT"}});
+        logger.error(`Todo with ID = ${todoId} not found`, {userId, todoId});
+        throw new Error(`Todo with ID = ${todoId} not found`);
     }
 
     await todoTable.update(db, userId, todoId, {status: TodoStatus.INACTIVE});
