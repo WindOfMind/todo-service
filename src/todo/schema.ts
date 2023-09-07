@@ -47,7 +47,7 @@ interface CompleteTodoRequest {
 
 export const todoQueries = {
     todos: (_: unknown, args: GetTodoRequest, contextValue: AppContext) => {
-        return todoService.getTodos(contextValue.db, args.userId, args.status);
+        return todoService.getTodos(contextValue.db, args.userId, {status: args.status, listId: args.listId});
     }
 };
 

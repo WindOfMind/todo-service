@@ -1,22 +1,18 @@
 import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
-import {TodoCreateParams, TodoDbRow, TodoStatus, TodoUpdateParams} from "./todo.js";
+import {TodoCreateParams, TodoDbRow, TodoFilter, TodoUpdateParams} from "./todo.js";
 
 const TABLE_NAME = "todo";
 
-const find = async function (
-    db: IDatabase<IClient>,
-    userId: number,
-    status?: TodoStatus,
-    ids?: number[]
-): Promise<TodoDbRow[]> {
-    const statusCondition = status ? `AND  status = ${status}` : "";
-    const idsCondition = ids ? `AND todo_id IN (${ids.join(",")})` : "";
+const find = async function (db: IDatabase<IClient>, userId: number, where: TodoFilter): Promise<TodoDbRow[]> {
+    const listCondition = where.listId ? `AND  list_id = ${where.listId}` : "";
+    const statusCondition = where.status ? `AND  status = ${where.status}` : "";
+    const idsCondition = where.ids ? `AND todo_id IN (${where.ids.join(",")})` : "";
 
     const query = `
         SELECT todo_id, title, description, list_id, status, user_id
         FROM ${TABLE_NAME}
-        WHERE user_id = ${userId} ${statusCondition} ${idsCondition}
+        WHERE user_id = ${userId} ${statusCondition} ${idsCondition} ${listCondition}
     `;
 
     return db.manyOrNone<TodoDbRow>(query);

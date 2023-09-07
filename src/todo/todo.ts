@@ -34,6 +34,12 @@ export interface TodoUpdateParams {
     status?: TodoStatus;
 }
 
+export interface TodoFilter {
+    ids?: number[];
+    status?: TodoStatus;
+    listId?: number;
+}
+
 export const fromDbRow = function (row: TodoDbRow) {
     return {
         todoId: row.todo_id,

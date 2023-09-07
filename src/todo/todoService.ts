@@ -1,7 +1,7 @@
 import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {todoTable} from "./todoTable.js";
-import {TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, TodoCreateParams, TodoStatus, fromDbRow} from "./todo.js";
+import {TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, TodoCreateParams, TodoFilter, TodoStatus, fromDbRow} from "./todo.js";
 import {listTable} from "../list/listTable.js";
 import {Logger} from "../logger.js";
 import {validateString} from "../utils/validation.js";
@@ -30,7 +30,7 @@ const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCre
 };
 
 const getTodo = async function (db: IDatabase<IClient>, userId: number, todoId: number) {
-    const rows = await todoTable.find(db, userId, undefined, [todoId]);
+    const rows = await todoTable.find(db, userId, {ids: [todoId]});
 
     if (!rows.length) {
         return null;
@@ -39,8 +39,8 @@ const getTodo = async function (db: IDatabase<IClient>, userId: number, todoId: 
     return fromDbRow(rows[0]);
 };
 
-const getTodos = async function (db: IDatabase<IClient>, userId: number, status?: TodoStatus) {
-    const rows = await todoTable.find(db, userId, status);
+const getTodos = async function (db: IDatabase<IClient>, userId: number, where: TodoFilter) {
+    const rows = await todoTable.find(db, userId, where);
 
     return rows.map((row) => fromDbRow(row));
 };
