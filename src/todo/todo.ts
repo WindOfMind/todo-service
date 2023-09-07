@@ -15,7 +15,7 @@ export enum TodoStatus {
 export interface TodoCreateParams {
     userId: number;
     title: string;
-    status: string;
+    status: TodoStatus;
     description?: string;
     listId?: number;
 }
