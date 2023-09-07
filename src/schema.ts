@@ -1,13 +1,16 @@
-import {listTypeDefs} from "./list/schema.js";
-import {todoMutations, todoQueries, todoTypeDefs} from "./todo/schema.js";
+import {listMutations, listQueries, listTypeDefs} from "./list/schema.js";
+import {todoChildren, todoMutations, todoQueries, todoTypeDefs} from "./todo/schema.js";
 
 export const typeDefs = [todoTypeDefs, listTypeDefs].join("");
 
 export const resolvers = {
     Query: {
-        ...todoQueries
+        ...todoQueries,
+        ...listQueries
     },
     Mutation: {
-        ...todoMutations
-    }
+        ...todoMutations,
+        ...listMutations
+    },
+    ...todoChildren
 };

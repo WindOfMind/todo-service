@@ -3,8 +3,19 @@ import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {todoTable} from "./todoTable.js";
 import {TodoCreateParams, TodoStatus, fromDbRow} from "./todo.js";
 import {GraphQLError} from "graphql";
+import {listTable} from "../list/listTable.js";
 
 const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCreateParams) {
+    if (createParams.listId !== undefined) {
+        const lists = await listTable.find(db, createParams.userId, [createParams.listId]);
+
+        if (lists.length === 0) {
+            throw new GraphQLError(`List with ID = ${createParams.listId} not found`, {
+                extensions: {code: "BAD_USER_INPUT"}
+            });
+        }
+    }
+
     const id = await todoTable.add(db, createParams);
 
     return todoService.getTodo(db, createParams.userId, id);

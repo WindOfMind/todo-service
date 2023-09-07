@@ -1,5 +1,6 @@
 import {AppContext} from "../context.js";
-import {TodoStatus} from "./todo.js";
+import {listService} from "../list/listService.js";
+import {Todo, TodoStatus} from "./todo.js";
 import {todoService} from "./todoService.js";
 
 export const todoTypeDefs = `#graphql
@@ -62,5 +63,17 @@ export const todoMutations = {
     },
     completeTodo: async (_: unknown, args: CompleteTodoRequest, contextValue: AppContext) => {
         return todoService.complete(contextValue.db, args.userId, args.todoId);
+    }
+};
+
+export const todoChildren = {
+    Todo: {
+        list: async (parent: Todo, _: unknown, contextValue: AppContext) => {
+            if (parent.listId === undefined) {
+                return null;
+            }
+
+            return listService.getList(contextValue.db, parent.userId, parent.listId);
+        }
     }
 };

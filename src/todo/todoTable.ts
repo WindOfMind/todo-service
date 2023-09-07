@@ -14,7 +14,7 @@ const find = async function (
     const idsCondition = ids ? `AND todo_id IN (${ids.join(",")})` : "";
 
     const query = `
-        SELECT todo_id, title, description, list_id, status 
+        SELECT todo_id, title, description, list_id, status, user_id
         FROM ${TABLE_NAME}
         WHERE user_id = ${userId} ${statusCondition} ${idsCondition}
     `;

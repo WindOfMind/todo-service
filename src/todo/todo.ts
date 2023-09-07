@@ -4,6 +4,7 @@ export interface Todo {
     description: string;
     status: TodoStatus;
     listId?: number;
+    userId: number;
 }
 
 export enum TodoStatus {
@@ -25,6 +26,7 @@ export interface TodoDbRow {
     description: string | null;
     status: string;
     list_id: number | null;
+    user_id: number;
 }
 
 export interface TodoUpdateParams {
@@ -38,6 +40,7 @@ export const fromDbRow = function (row: TodoDbRow) {
         title: row.title,
         description: row.description ?? "",
         status: row.status,
-        listId: row.list_id ?? undefined
+        listId: row.list_id ?? undefined,
+        userId: row.user_id
     };
 };
