@@ -40,12 +40,12 @@ export interface TodoFilter {
     listId?: number;
 }
 
-export const fromDbRow = function (row: TodoDbRow) {
+export const fromDbRow = function (row: TodoDbRow): Todo {
     return {
         todoId: row.todo_id,
         title: row.title,
         description: row.description ?? "",
-        status: row.status,
+        status: row.status as TodoStatus,
         listId: row.list_id ?? undefined,
         userId: row.user_id
     };

@@ -1,12 +1,16 @@
 import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {todoTable} from "./todoTable.js";
-import {TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, TodoCreateParams, TodoFilter, TodoStatus, fromDbRow} from "./todo.js";
+import {TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, Todo, TodoCreateParams, TodoFilter, TodoStatus, fromDbRow} from "./todo.js";
 import {listTable} from "../list/listTable.js";
 import {Logger} from "../logger.js";
 import {validateString} from "../utils/validation.js";
+import {Pagination, Response} from "../common/Pagination.js";
 
 const logger = Logger();
+
+const DEFAULT_LIMIT = 100;
+const MAX_LIMIT = 1000;
 
 const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCreateParams) {
     if (createParams.listId !== undefined) {
@@ -30,7 +34,7 @@ const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCre
 };
 
 const getTodo = async function (db: IDatabase<IClient>, userId: number, todoId: number) {
-    const rows = await todoTable.find(db, userId, {ids: [todoId]});
+    const rows = await todoTable.find(db, userId, {ids: [todoId]}, {});
 
     if (!rows.length) {
         return null;
@@ -39,10 +43,29 @@ const getTodo = async function (db: IDatabase<IClient>, userId: number, todoId: 
     return fromDbRow(rows[0]);
 };
 
-const getTodos = async function (db: IDatabase<IClient>, userId: number, where: TodoFilter) {
-    const rows = await todoTable.find(db, userId, where);
+const getTodos = async function (
+    db: IDatabase<IClient>,
+    userId: number,
+    where: TodoFilter,
+    options: Pagination
+): Promise<Response<Todo>> {
+    options = {
+        first: options.first ? Math.min(options.first, MAX_LIMIT) : DEFAULT_LIMIT,
+        after: options.after
+    };
+    const rows = await todoTable.find(db, userId, where, options);
+    const total = await todoTable.count(db, userId, where);
+    const todos = rows.map((row) => fromDbRow(row));
+    const edges = todos.map((todo) => ({
+        node: todo,
+        cursor: todo.todoId.toString()
+    }));
 
-    return rows.map((row) => fromDbRow(row));
+    return {
+        edges,
+        endCursor: todos.length ? todos[todos.length - 1].todoId.toString() : "",
+        totalCount: total
+    };
 };
 
 const complete = async function (db: IDatabase<IClient>, userId: number, todoId: number) {

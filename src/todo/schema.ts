@@ -4,6 +4,11 @@ import {Todo, TodoStatus} from "./todo.js";
 import {todoService} from "./todoService.js";
 
 export const todoTypeDefs = `#graphql
+    enum TodoStatus {
+        active
+        inactive
+    }
+
     type Todo {
         todoId: ID!
         title: String!
@@ -12,18 +17,24 @@ export const todoTypeDefs = `#graphql
         list: List
     }
 
+    type Edge {
+        cursor: String
+        node: Todo
+    }
+
+    type Response {
+        edges: [Edge]
+        endCursor: String
+        totalCount: Int
+    }
+
     type Query {
-        todos(userId: Int!, status: TodoStatus, listId: Int): [Todo]
+        todos(userId: Int!, status: TodoStatus, listId: Int, first: Int , after: String): Response
     }
 
     type Mutation {
         addTodo(userId: Int!, title: String!, description: String, listId: Int): Todo
         completeTodo(userId: Int!, todoId: ID!): Todo
-    }
-
-    enum TodoStatus {
-        active
-        inactive
     }
 `;
 
@@ -31,6 +42,8 @@ interface GetTodoRequest {
     userId: number;
     status?: TodoStatus;
     listId?: number;
+    first?: number;
+    after?: string;
 }
 
 interface CreateTodoRequest {
@@ -47,7 +60,12 @@ interface CompleteTodoRequest {
 
 export const todoQueries = {
     todos: (_: unknown, args: GetTodoRequest, contextValue: AppContext) => {
-        return todoService.getTodos(contextValue.db, args.userId, {status: args.status, listId: args.listId});
+        return todoService.getTodos(
+            contextValue.db,
+            args.userId,
+            {status: args.status, listId: args.listId},
+            {first: args.first, after: args.after}
+        );
     }
 };
 
