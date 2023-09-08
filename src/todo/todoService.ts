@@ -5,12 +5,9 @@ import {TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, Todo, TodoCreateParams, TodoFilter, 
 import {listTable} from "../list/listTable.js";
 import {Logger} from "../logger.js";
 import {validateString} from "../utils/validation.js";
-import {Pagination, Response} from "../common/Pagination.js";
+import {Pagination, Response, validatePagination} from "../common/Pagination.js";
 
 const logger = Logger();
-
-const DEFAULT_LIMIT = 100;
-const MAX_LIMIT = 1000;
 
 const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCreateParams) {
     if (createParams.listId !== undefined) {
@@ -75,13 +72,6 @@ const complete = async function (db: IDatabase<IClient>, userId: number, todoId:
     await todoTable.update(db, userId, todoId, {status: TodoStatus.INACTIVE});
 
     return {...todo, status: TodoStatus.INACTIVE};
-};
-
-const validatePagination = function (pagination: Pagination) {
-    return {
-        first: pagination.first ? Math.min(pagination.first, MAX_LIMIT) : DEFAULT_LIMIT,
-        after: isNaN(Number(pagination.after)) ? undefined : pagination.after
-    };
 };
 
 export const todoService = {
