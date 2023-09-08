@@ -51,7 +51,7 @@ const getTodos = async function (
 ): Promise<Response<Todo>> {
     options = {
         first: options.first ? Math.min(options.first, MAX_LIMIT) : DEFAULT_LIMIT,
-        after: options.after
+        after: isNaN(Number(options.after)) ? undefined : options.after
     };
     const rows = await todoTable.find(db, userId, where, options);
     const total = await todoTable.count(db, userId, where);
