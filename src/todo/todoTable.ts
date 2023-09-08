@@ -1,7 +1,7 @@
 import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {TodoCreateParams, TodoDbRow, TodoFilter, TodoUpdateParams} from "./todo.js";
-import {Pagination} from "../common/Pagination.js";
+import {Pagination} from "../common/pagination.js";
 
 const TABLE_NAME = "todo";
 

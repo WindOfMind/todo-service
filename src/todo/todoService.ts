@@ -5,7 +5,7 @@ import {TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, Todo, TodoCreateParams, TodoFilter, 
 import {listTable} from "../list/listTable.js";
 import {Logger} from "../logger.js";
 import {validateString} from "../utils/validation.js";
-import {Pagination, Response, validatePagination} from "../common/Pagination.js";
+import {Pagination, Response, validatePagination} from "../common/pagination.js";
 
 const logger = Logger();
 
