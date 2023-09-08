@@ -49,10 +49,7 @@ const getTodos = async function (
     where: TodoFilter,
     options: Pagination
 ): Promise<Response<Todo>> {
-    options = {
-        first: options.first ? Math.min(options.first, MAX_LIMIT) : DEFAULT_LIMIT,
-        after: isNaN(Number(options.after)) ? undefined : options.after
-    };
+    options = validatePagination(options);
     const rows = await todoTable.find(db, userId, where, options);
     const total = await todoTable.count(db, userId, where);
     const todos = rows.map((row) => fromDbRow(row));
@@ -78,6 +75,13 @@ const complete = async function (db: IDatabase<IClient>, userId: number, todoId:
     await todoTable.update(db, userId, todoId, {status: TodoStatus.INACTIVE});
 
     return {...todo, status: TodoStatus.INACTIVE};
+};
+
+const validatePagination = function (pagination: Pagination) {
+    return {
+        first: pagination.first ? Math.min(pagination.first, MAX_LIMIT) : DEFAULT_LIMIT,
+        after: isNaN(Number(pagination.after)) ? undefined : pagination.after
+    };
 };
 
 export const todoService = {
