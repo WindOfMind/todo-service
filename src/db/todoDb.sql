@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS list (
     list_id bigserial PRIMARY KEY,
     user_id bigint NOT NUll,
     name varchar(512) NOT NULL,
-    created_at timestamptz NOT NULL DEFAULT now()
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS todo (
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS todo (
     user_id bigint NOT NUll,
     todoist_item_id varchar(512), -- in the case of separate integration service - should be migrated into a separate standalone DB
     created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
     FOREIGN KEY (list_id)
       REFERENCES list (list_id)
 );
@@ -27,6 +29,7 @@ CREATE TABLE IF NOT EXISTS user_integration (
     user_id bigint NOT NUll,
     integration_name varchar(100) NOT NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
     UNIQUE(user_id, integration_name)
 );
 
@@ -37,6 +40,7 @@ CREATE TABLE IF NOT EXISTS todoist_integration (
     sync_token varchar(512),
     status varchar(100) DEFAULT 'active',
     created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
     UNIQUE(user_id)
 );
 
@@ -45,7 +49,8 @@ CREATE TABLE IF NOT EXISTS scheduler_task (
     name varchar(512),
     parameters TEXT, -- serialized JSON with custom parameters
     status varchar(100) DEFAULT 'pending',
-    created_at timestamptz NOT NULL DEFAULT now()
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE INDEX status_idx ON scheduler_task (status);

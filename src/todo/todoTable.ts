@@ -2,6 +2,7 @@ import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {TodoCreateParams, TodoDbRow, TodoFilter, TodoStatus, TodoUpdateParams} from "./todo.js";
 import {Pagination} from "../common/pagination.js";
+import {unixTimestamp} from "../utils/time.js";
 
 const TABLE_NAME = "todo";
 
@@ -74,10 +75,11 @@ const update = async function (db: IDatabase<IClient>, userId: number, todoId: n
         ? [`completed_at = to_timestamp(${updateParams.completed_at})`]
         : [];
     const listUpdate = updateParams.listId !== undefined ? [`list_id = ${updateParams.listId}`] : [];
+    const updateAt = unixTimestamp();
 
     const query = `
         UPDATE ${TABLE_NAME}
-        SET ${[...completeUpdate, ...listUpdate].join(",")}
+        SET ${[...completeUpdate, ...listUpdate].join(",")}, updated_at = to_timestamp(${updateAt})
         WHERE user_id = ${userId} AND todo_id = ${todoId}
     `;
 
