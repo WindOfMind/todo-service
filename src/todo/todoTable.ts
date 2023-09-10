@@ -1,13 +1,21 @@
 import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
-import {TodoCreateParams, TodoDbRow, TodoFilter, TodoUpdateParams} from "./todo.js";
+import {TodoCreateParams, TodoDbRow, TodoFilter, TodoStatus, TodoUpdateParams} from "./todo.js";
 import {Pagination} from "../common/pagination.js";
 
 const TABLE_NAME = "todo";
 
+const buildStatusFilter = function (status?: TodoStatus) {
+    if (!status) {
+        return "";
+    }
+
+    return status == TodoStatus.ACTIVE ? "AND completed_at = NULL" : `AND completed_at != NULL`;
+};
+
 const buildFilter = function (where: TodoFilter) {
     const listCondition = where.listId ? `AND list_id = ${where.listId}` : "";
-    const statusCondition = where.status ? `AND status = '${where.status}'` : "";
+    const statusCondition = buildStatusFilter(where.status);
     const idsCondition = where.ids ? `AND todo_id IN (${where.ids.join(",")})` : "";
 
     return `${statusCondition} ${idsCondition} ${listCondition}`;
@@ -32,7 +40,7 @@ const find = async function (
     const cursor = options.after ? pgp.as.format("AND todo_id > $1 ", options.after) : "";
 
     const query = `
-        SELECT todo_id, title, description, list_id, status, user_id
+        SELECT todo_id, title, description, list_id, extract(epoch FROM completed_at), user_id
         FROM ${TABLE_NAME}
         WHERE user_id = ${userId} ${filter} ${cursor}
         ${limit}
@@ -43,15 +51,14 @@ const find = async function (
 
 const add = async function (db: IDatabase<IClient>, createParams: TodoCreateParams) {
     const query = `
-        INSERT INTO ${TABLE_NAME}(title, description, list_id, status, user_id) 
-        VALUES ($1, $2, $3, $4, $5) RETURNING todo_id
+        INSERT INTO ${TABLE_NAME}(title, description, list_id, user_id) 
+        VALUES ($1, $2, $3, $4) RETURNING todo_id
     `;
 
     const values = [
         createParams.title,
         createParams.description ?? null,
         createParams.listId ?? null,
-        createParams.status,
         createParams.userId
     ];
 
@@ -59,16 +66,18 @@ const add = async function (db: IDatabase<IClient>, createParams: TodoCreatePara
 };
 
 const update = async function (db: IDatabase<IClient>, userId: number, todoId: number, updateParams: TodoUpdateParams) {
-    if (updateParams.listId === undefined && !updateParams.status) {
+    if (updateParams.listId === undefined && !updateParams.completed_at) {
         return;
     }
 
-    const statusUpdate = updateParams.status ? [`status = '${updateParams.status}'`] : [];
+    const completeUpdate = updateParams.completed_at
+        ? [`completed_at = to_timestamp(${updateParams.completed_at})`]
+        : [];
     const listUpdate = updateParams.listId !== undefined ? [`list_id = ${updateParams.listId}`] : [];
 
     const query = `
         UPDATE ${TABLE_NAME}
-        SET ${[...statusUpdate, ...listUpdate].join(",")}
+        SET ${[...completeUpdate, ...listUpdate].join(",")}
         WHERE user_id = ${userId} AND todo_id = ${todoId}
     `;
 

@@ -1,11 +1,12 @@
 import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {todoTable} from "./todoTable.js";
-import {TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, Todo, TodoCreateParams, TodoFilter, TodoStatus, fromDbRow} from "./todo.js";
+import {TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, Todo, TodoCreateParams, TodoFilter, fromDbRow} from "./todo.js";
 import {listTable} from "../list/listTable.js";
 import {Logger} from "../logger.js";
 import {validateString} from "../utils/validation.js";
 import {Pagination, Response, validatePagination} from "../common/pagination.js";
+import {unixTimestamp} from "../utils/time.js";
 
 const logger = Logger();
 
@@ -68,10 +69,10 @@ const complete = async function (db: IDatabase<IClient>, userId: number, todoId:
         logger.error(`Todo with ID = ${todoId} not found`, {userId, todoId});
         throw new Error(`Todo with ID = ${todoId} not found`);
     }
+    const completedAt = unixTimestamp();
+    await todoTable.update(db, userId, todoId, {completed_at: completedAt});
 
-    await todoTable.update(db, userId, todoId, {status: TodoStatus.INACTIVE});
-
-    return {...todo, status: TodoStatus.INACTIVE};
+    return {...todo, completed_at: completedAt};
 };
 
 export const todoService = {
