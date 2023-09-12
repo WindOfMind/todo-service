@@ -37,16 +37,15 @@ const find = async function (
     const filter = buildFilter(where);
     const limit = options?.pagination?.first ? `LIMIT ${options.pagination.first}` : "";
     const cursor = options?.pagination?.after
-        ? db.$config.pgp.as.format("AND todo_id > $1 ", options.pagination.after)
+        ? db.$config.pgp.as.format("AND t.todo_id > $1 ", options.pagination.after)
         : "";
-    const join = options?.includeList ? "JOIN list ON t.list_id = l.list_id" : "";
-    const listSelect = options?.includeList ? ", l.list_id, l.list_name" : "";
+    const join = options?.includeList ? "JOIN list l ON t.list_id = l.list_id" : "";
+    const listSelect = options?.includeList ? ", l.list_id, l.name as list_name" : "";
 
     const query = `
-        SELECT todo_id, title, description, extract(epoch FROM completed_at), user_id, external_ref ${listSelect}
-        FROM t ${TABLE_NAME}
-        ${join}
-        WHERE user_id = ${userId} ${filter} ${cursor}
+        SELECT t.todo_id, t.title, t.description, extract(epoch FROM t.completed_at), t.user_id, t.external_ref ${listSelect}
+        FROM ${TABLE_NAME} t ${join}
+        WHERE t.user_id = ${userId} ${filter} ${cursor}
         ${limit}
     `;
 

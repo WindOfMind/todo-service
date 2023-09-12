@@ -27,7 +27,7 @@ const find = async function (db: IDatabase<IClient>, status: TaskStatus, limit: 
 
 const update = async function (db: IDatabase<IClient>, taskId: number, status: TaskStatus) {
     const query = `
-        UPDATE $1
+        UPDATE $1:name
         SET status = $2
         WHERE task_id = $3
     `;

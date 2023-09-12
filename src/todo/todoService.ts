@@ -50,11 +50,11 @@ const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCre
         return todoId;
     });
 
-    return todoService.getTodo(db, createParams.userId, id);
+    return todoService.getTodo(db, createParams.userId, id, true);
 };
 
-const getTodo = async function (db: IDatabase<IClient>, userId: number, todoId: number) {
-    const rows = await todoTable.find(db, userId, {ids: [todoId]});
+const getTodo = async function (db: IDatabase<IClient>, userId: number, todoId: number, includeList?: boolean) {
+    const rows = await todoTable.find(db, userId, {ids: [todoId]}, {includeList});
 
     if (!rows.length) {
         return null;
