@@ -5,7 +5,7 @@ import {TodoistParameters, UserIntegrationDbRow} from "../userIntegration.js";
 import {TodoAddedTaskParameters, TodoCompletedTaskParameters} from "../../task/task.js";
 import {randomUUID} from "crypto";
 
-const handleInitialSync = async function (db: IDatabase<IClient>, params: UserIntegrationDbRow) {
+const handleInitialSync = async function (params: UserIntegrationDbRow) {
     // call the todoist api https://developer.todoist.com/sync/v9/#sync for full sync here
     // get sync token and insert all items in chunks in the todoDb
 
@@ -17,7 +17,6 @@ const handleInitialSync = async function (db: IDatabase<IClient>, params: UserIn
 };
 
 const handleTodoAdded = async function (
-    db: IDatabase<IClient>,
     userIntegrationParams: UserIntegrationDbRow,
     todoParams: TodoAddedTaskParameters
 ) {
@@ -27,7 +26,6 @@ const handleTodoAdded = async function (
 };
 
 const handleTodoCompleted = async function (
-    db: IDatabase<IClient>,
     userIntegrationParams: UserIntegrationDbRow,
     todoParams: TodoCompletedTaskParameters,
     externalItemId: string
@@ -35,7 +33,7 @@ const handleTodoCompleted = async function (
     // add implementation here
 };
 
-export const todoistIntegrationService = {
+export const todoistClient = {
     handleInitialSync,
     handleTodoAdded,
     handleTodoCompleted
