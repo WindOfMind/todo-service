@@ -13,7 +13,7 @@ export interface ListCreateParams {
     name: string;
 }
 
-export const fromDbRow = function (row: ListDbRow) {
+export const toList = function (row: ListDbRow) {
     return {
         listId: row.list_id,
         name: row.name

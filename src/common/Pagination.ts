@@ -14,9 +14,9 @@ export interface Response<T> {
     totalCount: number;
 }
 
-export const validatePagination = function (pagination: Pagination, maxFirst = 1000, defaultFirst = 100) {
+export const validatePagination = function (pagination?: Pagination, maxFirst = 1000, defaultFirst = 100) {
     return {
-        first: pagination.first ? Math.min(pagination.first, maxFirst) : defaultFirst,
-        after: isNaN(Number(pagination.after)) ? undefined : pagination.after
+        first: pagination?.first ? Math.min(pagination.first, maxFirst) : defaultFirst,
+        after: isNaN(Number(pagination?.after)) ? undefined : pagination?.after
     };
 };

@@ -1,7 +1,6 @@
 import {IDatabase, ITask} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
-import {TodoCreateDbParams, TodoDbRow, TodoFilter, TodoStatus, TodoUpdateParams} from "./todo.js";
-import {Pagination} from "../common/pagination.js";
+import {TodoCreateDbParams, TodoDbRow, TodoFetchOptions, TodoFilter, TodoStatus, TodoUpdateParams} from "./todo.js";
 import {unixTimestamp} from "../utils/time.js";
 
 const TABLE_NAME = "todo";
@@ -33,16 +32,20 @@ const find = async function (
     db: IDatabase<IClient>,
     userId: number,
     where: TodoFilter,
-    options: Pagination
+    options?: TodoFetchOptions
 ): Promise<TodoDbRow[]> {
     const filter = buildFilter(where);
-    const limit = options.first ? `LIMIT ${options.first}` : "";
-    const pgp = db.$config.pgp;
-    const cursor = options.after ? pgp.as.format("AND todo_id > $1 ", options.after) : "";
+    const limit = options?.pagination?.first ? `LIMIT ${options.pagination.first}` : "";
+    const cursor = options?.pagination?.after
+        ? db.$config.pgp.as.format("AND todo_id > $1 ", options.pagination.after)
+        : "";
+    const join = options?.includeList ? "JOIN list ON t.list_id = l.list_id" : "";
+    const listSelect = options?.includeList ? ", l.list_id, l.list_name" : "";
 
     const query = `
-        SELECT todo_id, title, description, list_id, extract(epoch FROM completed_at), user_id, external_ref
-        FROM ${TABLE_NAME}
+        SELECT todo_id, title, description, extract(epoch FROM completed_at), user_id, external_ref ${listSelect}
+        FROM t ${TABLE_NAME}
+        ${join}
         WHERE user_id = ${userId} ${filter} ${cursor}
         ${limit}
     `;

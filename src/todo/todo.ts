@@ -1,3 +1,6 @@
+import {Pagination} from "../common/pagination.js";
+import {List, toList} from "../list/list.js";
+
 export type tUnixTimestamp = number;
 
 export interface Todo {
@@ -5,7 +8,7 @@ export interface Todo {
     title: string;
     description: string;
     completed_at?: tUnixTimestamp;
-    listId?: number;
+    list?: List;
     userId: number;
     externalRef: string;
 }
@@ -33,6 +36,7 @@ export interface TodoDbRow {
     description: string | null;
     completed_at: number | null;
     list_id: number | null;
+    list_name: string | null;
     user_id: number;
     external_ref: string;
 }
@@ -48,13 +52,18 @@ export interface TodoFilter {
     listId?: number;
 }
 
-export const fromDbRow = function (row: TodoDbRow): Todo {
+export interface TodoFetchOptions {
+    pagination?: Pagination;
+    includeList?: boolean;
+}
+
+export const toTodo = function (row: TodoDbRow): Todo {
     return {
         todoId: row.todo_id,
         title: row.title,
         description: row.description ?? "",
         completed_at: row.completed_at ?? undefined,
-        listId: row.list_id ?? undefined,
+        list: row.list_id && row.list_name ? toList({list_id: row.list_id, name: row.list_name}) : undefined,
         userId: row.user_id,
         externalRef: row.external_ref
     };

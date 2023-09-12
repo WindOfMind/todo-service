@@ -1,11 +1,19 @@
 import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {todoTable} from "./todoTable.js";
-import {TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, Todo, TodoCreateParams, TodoFilter, fromDbRow} from "./todo.js";
+import {
+    TITLE_MAX_LENGTH,
+    TITLE_MIN_LENGTH,
+    Todo,
+    TodoCreateParams,
+    TodoFetchOptions,
+    TodoFilter,
+    toTodo
+} from "./todo.js";
 import {listTable} from "../list/listTable.js";
 import {Logger} from "../logger.js";
 import {validateString} from "../utils/validation.js";
-import {Pagination, Response, validatePagination} from "../common/pagination.js";
+import {Response, validatePagination} from "../common/pagination.js";
 import {unixTimestamp} from "../utils/time.js";
 import {taskScheduler} from "../task/taskScheduler.js";
 import {TaskName, TodoAddedTaskParameters} from "../task/task.js";
@@ -46,25 +54,25 @@ const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCre
 };
 
 const getTodo = async function (db: IDatabase<IClient>, userId: number, todoId: number) {
-    const rows = await todoTable.find(db, userId, {ids: [todoId]}, {});
+    const rows = await todoTable.find(db, userId, {ids: [todoId]});
 
     if (!rows.length) {
         return null;
     }
 
-    return fromDbRow(rows[0]);
+    return toTodo(rows[0]);
 };
 
 const getTodos = async function (
     db: IDatabase<IClient>,
     userId: number,
     where: TodoFilter,
-    options: Pagination
+    options?: TodoFetchOptions
 ): Promise<Response<Todo>> {
-    options = validatePagination(options);
-    const rows = await todoTable.find(db, userId, where, options);
+    const pagination = validatePagination(options?.pagination);
+    const rows = await todoTable.find(db, userId, where, {...options, pagination});
     const total = await todoTable.count(db, userId, where);
-    const todos = rows.map((row) => fromDbRow(row));
+    const todos = rows.map((row) => toTodo(row));
     const edges = todos.map((todo) => ({
         node: todo,
         cursor: todo.todoId.toString()

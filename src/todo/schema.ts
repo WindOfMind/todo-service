@@ -1,5 +1,4 @@
 import {AppContext} from "../context.js";
-import {listService} from "../list/listService.js";
 import {Todo, TodoStatus} from "./todo.js";
 import {todoService} from "./todoService.js";
 
@@ -57,7 +56,7 @@ export const todoQueries = {
             contextValue.db,
             args.userId,
             {listId: args.listId, status: TodoStatus.ACTIVE},
-            {first: args.first, after: args.after}
+            {includeList: true, pagination: {first: args.first, after: args.after}}
         );
     }
 };
@@ -78,12 +77,12 @@ export const todoMutations = {
 
 export const todoChildren = {
     Todo: {
-        list: async (parent: Todo, _: unknown, contextValue: AppContext) => {
-            if (parent.listId === undefined) {
+        list: async (parent: Todo) => {
+            if (!parent.list) {
                 return null;
             }
 
-            return listService.getList(contextValue.db, parent.userId, parent.listId);
+            return parent.list;
         }
     }
 };

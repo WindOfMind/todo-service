@@ -1,6 +1,6 @@
 import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
-import {ListCreateParams, NAME_MAX_LENGTH, NAME_MIN_LENGTH, fromDbRow} from "./list.js";
+import {ListCreateParams, NAME_MAX_LENGTH, NAME_MIN_LENGTH, toList} from "./list.js";
 import {listTable} from "./listTable.js";
 import {validateString} from "../utils/validation.js";
 import {Logger} from "../logger.js";
@@ -25,13 +25,13 @@ const getList = async function (db: IDatabase<IClient>, userId: number, listId: 
         return null;
     }
 
-    return fromDbRow(rows[0]);
+    return toList(rows[0]);
 };
 
 const getLists = async function (db: IDatabase<IClient>, userId: number, ids?: number[]) {
     const rows = await listTable.find(db, userId, ids);
 
-    return rows.map((row) => fromDbRow(row));
+    return rows.map((row) => toList(row));
 };
 
 export const listService = {
