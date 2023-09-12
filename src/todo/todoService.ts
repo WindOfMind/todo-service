@@ -7,6 +7,8 @@ import {Logger} from "../logger.js";
 import {validateString} from "../utils/validation.js";
 import {Pagination, Response, validatePagination} from "../common/pagination.js";
 import {unixTimestamp} from "../utils/time.js";
+import {taskScheduler} from "../task/taskScheduler.js";
+import {TaskName, TodoAddedTaskParameters} from "../task/task.js";
 
 const logger = Logger();
 
@@ -26,7 +28,17 @@ const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCre
         throw new Error(`Cannot create new todo: ${validation.error}`);
     }
 
-    const id = await todoTable.add(db, createParams);
+    const id = await db.tx(async (transaction) => {
+        const todoId = await todoTable.add(db, createParams, transaction);
+        await taskScheduler.scheduleTask<TodoAddedTaskParameters>(
+            db,
+            TaskName.TODO_ADDED,
+            {todoId, userId: createParams.userId},
+            transaction
+        );
+
+        return todoId;
+    });
 
     return todoService.getTodo(db, createParams.userId, id);
 };
@@ -70,7 +82,15 @@ const complete = async function (db: IDatabase<IClient>, userId: number, todoId:
         throw new Error(`Todo with ID = ${todoId} not found`);
     }
     const completedAt = unixTimestamp();
-    await todoTable.update(db, userId, todoId, {completed_at: completedAt});
+    await db.tx(async (transaction) => {
+        await todoTable.update(db, userId, todoId, {completed_at: completedAt});
+        await taskScheduler.scheduleTask<TodoAddedTaskParameters>(
+            db,
+            TaskName.TODO_ADDED,
+            {todoId, userId},
+            transaction
+        );
+    });
 
     return {...todo, completed_at: completedAt};
 };

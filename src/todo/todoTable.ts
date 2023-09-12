@@ -1,4 +1,4 @@
-import {IDatabase} from "pg-promise";
+import {IDatabase, ITask} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {TodoCreateParams, TodoDbRow, TodoFilter, TodoStatus, TodoUpdateParams} from "./todo.js";
 import {Pagination} from "../common/pagination.js";
@@ -50,7 +50,7 @@ const find = async function (
     return db.manyOrNone<TodoDbRow>(query);
 };
 
-const add = async function (db: IDatabase<IClient>, createParams: TodoCreateParams) {
+const add = async function (db: IDatabase<IClient>, createParams: TodoCreateParams, transaction?: ITask<IClient>) {
     const query = `
         INSERT INTO ${TABLE_NAME}(title, description, list_id, user_id) 
         VALUES ($1, $2, $3, $4) RETURNING todo_id
@@ -63,7 +63,7 @@ const add = async function (db: IDatabase<IClient>, createParams: TodoCreatePara
         createParams.userId
     ];
 
-    return db.one<number>(query, values, (row) => row.todo_id);
+    return (transaction ?? db).one<number>(query, values, (row) => row.todo_id);
 };
 
 const update = async function (db: IDatabase<IClient>, userId: number, todoId: number, updateParams: TodoUpdateParams) {

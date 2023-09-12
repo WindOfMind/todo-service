@@ -10,7 +10,10 @@ import pgPromise, {IMain, IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {AppContext} from "./context.js";
 import "dotenv/config";
+import {taskRunner} from "./task/taskRunner.js";
+import {Logger} from "./logger.js";
 
+const logger = Logger();
 const app: Express = express();
 const httpServer = http.createServer(app);
 
@@ -34,4 +37,7 @@ app.use(
 );
 
 await new Promise<void>((resolve) => httpServer.listen({port: 4000}, resolve));
-console.log(`🚀 Server ready at http://localhost:4000/graphql`);
+logger.info(`🚀 Server ready at http://localhost:4000/graphql`);
+
+const DEFAULT_INTERVAL = 200;
+taskRunner.init(db, Number(process.env.INTEGRATION_INTERVAL ?? DEFAULT_INTERVAL));
