@@ -35,7 +35,13 @@ const handlers: Record<TaskName, (db: IDatabase<IClient>, params: string) => Pro
 };
 
 const init = function (db: IDatabase<IClient>, interval: number) {
-    return setInterval(async () => run(db), interval);
+    return setInterval(async () => {
+        try {
+            await run(db);
+        } catch (e) {
+            logger.error("Failed to run the task", e);
+        }
+    }, interval);
 };
 
 export const taskRunner = {
