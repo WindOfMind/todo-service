@@ -1,6 +1,6 @@
 import {IDatabase, ITask} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
-import {TodoCreateParams, TodoDbRow, TodoFilter, TodoStatus, TodoUpdateParams} from "./todo.js";
+import {TodoCreateDbParams, TodoDbRow, TodoFilter, TodoStatus, TodoUpdateParams} from "./todo.js";
 import {Pagination} from "../common/pagination.js";
 import {unixTimestamp} from "../utils/time.js";
 
@@ -41,7 +41,7 @@ const find = async function (
     const cursor = options.after ? pgp.as.format("AND todo_id > $1 ", options.after) : "";
 
     const query = `
-        SELECT todo_id, title, description, list_id, extract(epoch FROM completed_at), user_id
+        SELECT todo_id, title, description, list_id, extract(epoch FROM completed_at), user_id, external_ref
         FROM ${TABLE_NAME}
         WHERE user_id = ${userId} ${filter} ${cursor}
         ${limit}
@@ -50,17 +50,18 @@ const find = async function (
     return db.manyOrNone<TodoDbRow>(query);
 };
 
-const add = async function (db: IDatabase<IClient>, createParams: TodoCreateParams, transaction?: ITask<IClient>) {
+const add = async function (db: IDatabase<IClient>, createParams: TodoCreateDbParams, transaction?: ITask<IClient>) {
     const query = `
-        INSERT INTO ${TABLE_NAME}(title, description, list_id, user_id) 
-        VALUES ($1, $2, $3, $4) RETURNING todo_id
+        INSERT INTO ${TABLE_NAME}(title, description, list_id, user_id, external_ref) 
+        VALUES ($1, $2, $3, $4, $5) RETURNING todo_id
     `;
 
     const values = [
         createParams.title,
         createParams.description ?? null,
         createParams.listId ?? null,
-        createParams.userId
+        createParams.userId,
+        createParams.externalRef
     ];
 
     return (transaction ?? db).one<number>(query, values, (row) => row.todo_id);

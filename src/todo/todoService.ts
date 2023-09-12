@@ -9,6 +9,7 @@ import {Pagination, Response, validatePagination} from "../common/pagination.js"
 import {unixTimestamp} from "../utils/time.js";
 import {taskScheduler} from "../task/taskScheduler.js";
 import {TaskName, TodoAddedTaskParameters} from "../task/task.js";
+import {randomUUID} from "crypto";
 
 const logger = Logger();
 
@@ -27,9 +28,10 @@ const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCre
         logger.error(`Cannot create new todo: ${validation.error}`, {params: createParams});
         throw new Error(`Cannot create new todo: ${validation.error}`);
     }
+    const externalRef = createParams.external_ref ?? randomUUID();
 
     const id = await db.tx(async (transaction) => {
-        const todoId = await todoTable.add(db, createParams, transaction);
+        const todoId = await todoTable.add(db, {...createParams, externalRef}, transaction);
         await taskScheduler.scheduleTask<TodoAddedTaskParameters>(
             db,
             TaskName.TODO_ADDED,

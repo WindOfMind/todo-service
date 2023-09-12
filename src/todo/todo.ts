@@ -7,6 +7,7 @@ export interface Todo {
     completed_at?: tUnixTimestamp;
     listId?: number;
     userId: number;
+    externalRef: string;
 }
 
 export enum TodoStatus {
@@ -19,6 +20,11 @@ export interface TodoCreateParams {
     title: string;
     description?: string;
     listId?: number;
+    external_ref?: string;
+}
+
+export interface TodoCreateDbParams extends TodoCreateParams {
+    externalRef: string;
 }
 
 export interface TodoDbRow {
@@ -28,6 +34,7 @@ export interface TodoDbRow {
     completed_at: number | null;
     list_id: number | null;
     user_id: number;
+    external_ref: string;
 }
 
 export interface TodoUpdateParams {
@@ -48,7 +55,8 @@ export const fromDbRow = function (row: TodoDbRow): Todo {
         description: row.description ?? "",
         completed_at: row.completed_at ?? undefined,
         listId: row.list_id ?? undefined,
-        userId: row.user_id
+        userId: row.user_id,
+        externalRef: row.external_ref
     };
 };
 
