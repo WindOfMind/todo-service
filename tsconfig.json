@@ -4,14 +4,14 @@
     "target": "es2020",                                  
 
     /* Modules */
-    "module": "NodeNext",    
+    "module": "ESNext",   
+    "moduleResolution": "Node", 
     "rootDirs": ["src"],                          
-    "outDir": "dist",
+    // "outDir": "dist",
     "lib": ["es2020"],
     "esModuleInterop": true,                             
     "forceConsistentCasingInFileNames": true,         
-    "types": ["node", "express"],
-    "resolveJsonModule": true,
+    "types": ["node", "express", "jest"],
 
     /* Type Checking */
     "strict": true,                                 
@@ -28,6 +28,9 @@
     "noImplicitReturns": true,                      
     
     /* Completeness */
-    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
-  }
+    "skipLibCheck": true                                 
+  },
+  "exclude": [
+    "**/test"
+]
 }

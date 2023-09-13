@@ -1,7 +1,19 @@
 # Todo service
 
-A service to manage Todos built on top of [Node.js](https://nodejs.org/en),
+A service to manage TODOs built on top of [Node.js](https://nodejs.org/en),
 [express.js](https://expressjs.com/) and [apollo-server](https://www.apollographql.com/docs/apollo-server/).
+The server exposes [GraphQL](https://graphql.org/) API for managing TODOs:
+
+-   creating TODOs;
+-   fetching TODOs;
+-   completing TODOs;
+-   creating and fetching lists for TODOs;
+
+Calling `/graphql` endpoint during the local run will present a UI for testing these endpoints locally.
+
+## Security concerns
+
+## Integration with other third-party services
 
 ## How to run locally
 
@@ -21,3 +33,11 @@ A service to manage Todos built on top of [Node.js](https://nodejs.org/en),
 ### Local run
 
 -   Run `npm start` in the terminal.
+
+### Test run
+
+Currently, only spec (testing pure static logic without side-effect, e.g. DB updates) tests are presented.
+Ideally, component tests (run a service and treat it as a black box) should be added as well
+but it is out of scope of this example as it requires significant efforts to setup the proper environment.
+
+Run `npm test`.
