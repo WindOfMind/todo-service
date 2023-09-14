@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
-import {TodoistParameters, UserIntegrationDbRow} from "../userIntegration.js";
+import {UserIntegrationDbRow} from "../userIntegration.js";
 import {TodoAddedTaskParameters, TodoCompletedTaskParameters} from "../../task/task.js";
 import {randomUUID} from "crypto";
+
+export interface TodoistParameters {
+    sync_token?: string;
+}
 
 const handleInitialSync = async function (params: UserIntegrationDbRow) {
     // call the todoist api https://developer.todoist.com/sync/v9/#sync for full sync here
@@ -20,7 +24,7 @@ const handleTodoAdded = async function (
     userIntegrationParams: UserIntegrationDbRow,
     todoParams: TodoAddedTaskParameters
 ) {
-    // add implementation here
+    // call todoist api using access and sync tokens for incremental sync
 
     return randomUUID();
 };
@@ -30,7 +34,7 @@ const handleTodoCompleted = async function (
     todoParams: TodoCompletedTaskParameters,
     externalItemId: string
 ) {
-    // add implementation here
+    // call todoist api using access and sync tokens for incremental sync
 };
 
 export const todoistClient = {

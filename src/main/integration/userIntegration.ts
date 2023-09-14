@@ -36,7 +36,3 @@ export interface UserIntegrationDbRow {
     parameters: string | null;
     status: IntegrationStatus;
 }
-
-export interface TodoistParameters {
-    sync_token?: string;
-}

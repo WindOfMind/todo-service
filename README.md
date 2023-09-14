@@ -2,6 +2,7 @@
 
 A service to manage TODOs built on top of [Node.js](https://nodejs.org/en),
 [express.js](https://expressjs.com/) and [apollo-server](https://www.apollographql.com/docs/apollo-server/).
+The data is stored in the [PostgreSQL 15](https://www.postgresql.org/download/) DB.
 The server exposes [GraphQL](https://graphql.org/) API for managing TODOs:
 
 -   creating TODOs;
@@ -13,7 +14,31 @@ Calling `/graphql` endpoint during the local run will present a UI for testing t
 
 ## Security concerns
 
+Authentication and authorization are out of the scope of this implementation.
+
+Since TODOs can contain sensitive information it is important to keep the high level of security
+for the production ready version. Particularly, all request must have auth bearer token.
+Also, all sensitive data should be encrypted in the DB (e.g. access tokens, sync tokens, TODO's content);
+In the current implementation the `user id` is accepted as a request parameter,
+though in the production version we need to get in from the validated access token.
+
 ## Integration with other third-party services
+
+This project includes functionality for integrating with other TODO services (e.g. todoist).
+Integration is done using a task based approach for the sake of not relying on the 3d parties synchronously,
+i.e. when 3p is unavailable/slow we can still provide service to our clients and sync data later.
+Also, asynchronous approach provides lesser latency for our clients, but at the cost of increased sync lag.
+
+3p sync supposes the following flow:
+
+-   adding new user integration (auth flow is omitted in this project, more info [here](https://developer.todoist.com/guides/#authorization));
+-   making the initial sync based on automatically created task (fetching all user data from the 3p and getting teh sync token for incremental sync);
+-   uploading all existing TODOs from our service;
+-   update 3p service whenever update happens in our service based on a created task for that;
+-   receive any updates from the 3p service by exposing dedicated webhooks.
+
+If any task fails it will be safe to retry as all handlers should be implemented in the retry-safe way.
+Idempotency is achieved by using `external_ref` value of each TODO as an idempotency token.
 
 ## How to run locally
 
