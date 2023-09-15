@@ -17,8 +17,9 @@ const buildFilter = function (where: TodoFilter) {
     const listCondition = where.listId ? `AND list_id = ${where.listId}` : "";
     const statusCondition = buildStatusFilter(where.status);
     const idsCondition = where.ids ? `AND todo_id IN (${where.ids.join(",")})` : "";
+    const externalRefCondition = where.externalRef ? `AND external_ref IN (${where.externalRef.join(",")})` : "";
 
-    return `${statusCondition} ${idsCondition} ${listCondition}`;
+    return `${statusCondition} ${idsCondition} ${listCondition} ${externalRefCondition}`.trim();
 };
 
 const count = async function (db: IDatabase<IClient>, userId: number, where: TodoFilter) {
@@ -69,6 +70,28 @@ const add = async function (db: IDatabase<IClient>, createParams: TodoCreateDbPa
     return (transaction ?? db).one<number>(query, values, (row) => row.todo_id);
 };
 
+const bulkUpsert = async function (
+    db: IDatabase<IClient>,
+    createParams: TodoCreateDbParams[],
+    transaction?: ITask<IClient>
+) {
+    const cs = new db.$config.pgp.helpers.ColumnSet(["title", "description", "list_id", "user_id", "external_ref"], {
+        table: TABLE_NAME
+    });
+
+    const values = createParams.map((params) => ({
+        title: params.title,
+        description: params.description ?? null,
+        list_id: params.listId ?? null,
+        user_id: params.userId,
+        external_ref: params.externalRef
+    }));
+
+    const query = db.$config.pgp.helpers.insert(values, cs) + " ON CONFLICT (external_ref) DO NOTHING";
+
+    return (transaction ?? db).none(query, values);
+};
+
 const update = async function (db: IDatabase<IClient>, userId: number, todoId: number, updateParams: TodoUpdateParams) {
     if (updateParams.listId === undefined && !updateParams.completed_at) {
         return;
@@ -93,5 +116,6 @@ export const todoTable = {
     find,
     add,
     update,
-    count
+    count,
+    bulkUpsert
 };

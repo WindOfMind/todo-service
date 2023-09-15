@@ -1,6 +1,12 @@
 import {IDatabase} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
-import {IntegrationName, UserIntegrationCreateParams, UserIntegrationDbRow} from "./userIntegration.js";
+import {
+    IntegrationName,
+    IntegrationStatus,
+    IntegrationSyncResult,
+    UserIntegrationCreateParams,
+    UserIntegrationDbRow
+} from "./userIntegration.js";
 import {userIntegrationTable} from "./userIntegrationTable.js";
 import {Logger} from "../logger.js";
 import {taskScheduler} from "../task/taskScheduler.js";
@@ -12,6 +18,9 @@ import {
 } from "../task/task.js";
 import {todoistClient} from "./todoist/todoistClient.js";
 import {todoMappingTable} from "./todoMappingTable.js";
+import {todoTable} from "../todo/todoTable.js";
+import {createTodoMapping} from "./todoMapping.js";
+import {toTodo} from "../todo/todo.js";
 
 const logger = Logger();
 
@@ -33,7 +42,7 @@ const addUserIntegration = async function (db: IDatabase<IClient>, params: UserI
     });
 };
 
-const initialSyncHandler: Record<IntegrationName, (params: UserIntegrationDbRow) => Promise<string>> = {
+const initialSyncHandler: Record<IntegrationName, (params: UserIntegrationDbRow) => Promise<IntegrationSyncResult>> = {
     [IntegrationName.TODOIST]: todoistClient.handleInitialSync
 };
 
@@ -46,7 +55,7 @@ const todoAddedHandler: Record<
 
 const todoCompletedHandler: Record<
     IntegrationName,
-    (params: UserIntegrationDbRow, todoParams: TodoAddedTaskParameters, externalItemId: string) => Promise<void>
+    (externalItemId: string, params: UserIntegrationDbRow, todoParams: TodoAddedTaskParameters) => Promise<void>
 > = {
     [IntegrationName.TODOIST]: todoistClient.handleTodoCompleted
 };
@@ -59,11 +68,23 @@ const handleInitialSyncTask = async function (db: IDatabase<IClient>, params: st
         throw Error(`User integration ${initSyncParams.userIntegrationId} not found`);
     }
 
-    const syncParams = await initialSyncHandler[userIntegration.integration_name](userIntegration);
-    await userIntegrationTable.update(db, userIntegration.user_id, userIntegration.integration_name, {
-        parameters: syncParams
+    const integrationResult = await initialSyncHandler[userIntegration.integration_name](userIntegration);
+    await todoTable.bulkUpsert(db, integrationResult.todos);
+    const todos = await todoTable.find(db, userIntegration.user_id, {
+        externalRef: integrationResult.todos.map((todo) => todo.externalRef)
     });
-    // TODO: insert all synced items in chunks
+
+    const todoMappings = createTodoMapping(
+        userIntegration.user_integration_id,
+        integrationResult.todos,
+        todos.map((row) => toTodo(row))
+    );
+
+    await todoMappingTable.bulkUpsert(db, todoMappings);
+    await userIntegrationTable.update(db, userIntegration.user_id, userIntegration.integration_name, {
+        status: IntegrationStatus.ACTIVE,
+        integrationUserId: integrationResult.integrationUserId
+    });
 };
 
 const handleTodoAddedTask = async function (db: IDatabase<IClient>, params: string) {
@@ -107,7 +128,7 @@ const handleTodoCompletedTask = async function (db: IDatabase<IClient>, params: 
         }
 
         const handler = todoCompletedHandler[integration.integration_name];
-        await handler(integration, todoCompletedTaskParams, todoMapping.external_item_id);
+        await handler(todoMapping.external_item_id, integration, todoCompletedTaskParams);
     }
 };
 

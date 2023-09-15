@@ -1,4 +1,4 @@
-import {IDatabase} from "pg-promise";
+import {IDatabase, ITask} from "pg-promise";
 import {IClient} from "pg-promise/typescript/pg-subset.js";
 import {TodoMappingCreateParams, TodoMappingDbRow, TodoMappingFilter} from "./todoMapping.js";
 
@@ -28,7 +28,29 @@ const findOne = async function (db: IDatabase<IClient>, filter: TodoMappingFilte
     return db.oneOrNone<TodoMappingDbRow>(query);
 };
 
+const bulkUpsert = async function (
+    db: IDatabase<IClient>,
+    createParams: TodoMappingCreateParams[],
+    transaction?: ITask<IClient>
+) {
+    const cs = new db.$config.pgp.helpers.ColumnSet(["todo_id", "external_item_id", "user_integration_id"], {
+        table: TABLE_NAME
+    });
+
+    const values = createParams.map((params) => ({
+        todo_id: params.todoId,
+        external_item_id: params.externalItemId,
+        user_integration_id: params.userIntegrationId
+    }));
+
+    const query =
+        db.$config.pgp.helpers.insert(values, cs) + " ON CONFLICT (user_integration_id, external_item_id) DO NOTHING";
+
+    return (transaction ?? db).none(query, values);
+};
+
 export const todoMappingTable = {
     add,
-    findOne
+    findOne,
+    bulkUpsert
 };

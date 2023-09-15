@@ -1,23 +1,28 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {IDatabase} from "pg-promise";
-import {IClient} from "pg-promise/typescript/pg-subset.js";
-import {UserIntegrationDbRow} from "../userIntegration.js";
+import {IntegrationSyncResult, UserIntegrationDbRow} from "../userIntegration.js";
 import {TodoAddedTaskParameters, TodoCompletedTaskParameters} from "../../task/task.js";
 import {randomUUID} from "crypto";
+import {toTodo} from "./todoist.js";
 
-export interface TodoistParameters {
-    sync_token?: string;
-}
-
-const handleInitialSync = async function (params: UserIntegrationDbRow) {
+const handleInitialSync = async function (params: UserIntegrationDbRow): Promise<IntegrationSyncResult> {
     // call the todoist api https://developer.todoist.com/sync/v9/#sync for full sync here
     // get sync token and insert all items in chunks in the todoDb
 
-    const syncParams: TodoistParameters = {
-        sync_token: "TnYUZEpuzf2FMA9qzyY3j4xky6dXiYejmSO85S5paZ_a9y1FI85mBbIWZGpW"
+    const response = {
+        items: [
+            {
+                id: "2995104339",
+                content: "Buy Milk",
+                description: "The cheapest",
+                checked: false
+            }
+        ],
+        user: {
+            user_id: "2343243"
+        }
     };
 
-    return JSON.stringify(syncParams);
+    return {integrationUserId: response.user.user_id, todos: response.items.map((i) => toTodo(i, params.user_id))};
 };
 
 const handleTodoAdded = async function (
@@ -30,9 +35,9 @@ const handleTodoAdded = async function (
 };
 
 const handleTodoCompleted = async function (
+    externalItemId: string,
     userIntegrationParams: UserIntegrationDbRow,
-    todoParams: TodoCompletedTaskParameters,
-    externalItemId: string
+    todoParams: TodoCompletedTaskParameters
 ) {
     // call todoist api using access and sync tokens for incremental sync
 };

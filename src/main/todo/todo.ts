@@ -50,6 +50,7 @@ export interface TodoFilter {
     ids?: number[];
     status?: TodoStatus;
     listId?: number;
+    externalRef?: string[];
 }
 
 export interface TodoFetchOptions {

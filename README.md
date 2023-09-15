@@ -32,7 +32,7 @@ Also, asynchronous approach provides lesser latency for our clients, but at the 
 3p sync supposes the following flow:
 
 -   adding new user integration (auth flow is omitted in this project, more info [here](https://developer.todoist.com/guides/#authorization));
--   making the initial sync based on automatically created task (fetching all user data from the 3p and getting teh sync token for incremental sync);
+-   making the initial sync based on automatically created task (fetching all user data from the 3p);
 -   uploading all existing TODOs from our service;
 -   updating 3p service whenever update happens in our service based on a created task for that;
 -   receiving any updates from the 3p service by exposing dedicated webhooks.

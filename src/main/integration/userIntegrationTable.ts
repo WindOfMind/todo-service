@@ -55,10 +55,13 @@ const update = async function (
 
     const statusUpdate = update.status ? [`status = '${update.status}'`] : [];
     const parametersUpdate = update.parameters ? [`parameters = '${update.parameters}'`] : [];
+    const integrationUserIdUpdate = update.integrationUserId
+        ? [`integration_user_id = '${update.integrationUserId}'`]
+        : [];
 
     const query = `
         UPDATE ${TABLE_NAME} 
-        SET ${[...statusUpdate, ...parametersUpdate].join(",")}
+        SET ${[...statusUpdate, ...parametersUpdate, ...integrationUserIdUpdate].join(",")}
         WHERE user_id = ${userId} AND integration_name = '${integrationName}'
     `;
 

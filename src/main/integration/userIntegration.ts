@@ -1,3 +1,5 @@
+import {TodoCreateParams} from "../todo/todo";
+
 export interface UserIntegration<T> {
     userIntegrationId: number;
     userId: number;
@@ -26,6 +28,7 @@ export enum IntegrationStatus {
 export interface UserIntegrationUpdateParams {
     parameters?: string | null;
     status?: IntegrationStatus;
+    integrationUserId?: string;
 }
 
 export interface UserIntegrationDbRow {
@@ -35,4 +38,15 @@ export interface UserIntegrationDbRow {
     integration_name: IntegrationName;
     parameters: string | null;
     status: IntegrationStatus;
+    integration_user_id: string;
+}
+
+export interface ExternalTodoCreateParams extends TodoCreateParams {
+    externalRef: string;
+    externalId: string;
+}
+
+export interface IntegrationSyncResult {
+    todos: ExternalTodoCreateParams[];
+    integrationUserId: string;
 }
