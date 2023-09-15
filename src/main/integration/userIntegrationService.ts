@@ -20,7 +20,7 @@ import {todoistClient} from "./todoist/todoistClient.js";
 import {todoMappingTable} from "./todoMappingTable.js";
 import {todoTable} from "../todo/todoTable.js";
 import {createTodoMapping} from "./todoMapping.js";
-import {toTodo} from "../todo/todo.js";
+import {TodoStatus, toTodo} from "../todo/todo.js";
 
 const logger = Logger();
 
@@ -68,19 +68,36 @@ const handleInitialSyncTask = async function (db: IDatabase<IClient>, params: st
         throw Error(`User integration ${initSyncParams.userIntegrationId} not found`);
     }
 
+    if (userIntegration.status !== IntegrationStatus.PENDING) {
+        logger.notice("Integration already synced", userIntegration);
+        return;
+    }
+
+    const activeTodos = await todoTable.find(db, userIntegration.user_id, {
+        status: TodoStatus.ACTIVE
+    });
+    // TODO: optimise it - use bulk scheduling
+    await Promise.all(
+        activeTodos.map(async (todo) =>
+            taskScheduler.scheduleTask<TodoAddedTaskParameters>(db, TaskName.TODO_ADDED, {
+                todoId: todo.todo_id,
+                userId: userIntegration.user_id
+            })
+        )
+    );
+
     const integrationResult = await initialSyncHandler[userIntegration.integration_name](userIntegration);
     await todoTable.bulkUpsert(db, integrationResult.todos);
-    const todos = await todoTable.find(db, userIntegration.user_id, {
+    const insertedTodos = await todoTable.find(db, userIntegration.user_id, {
         externalRef: integrationResult.todos.map((todo) => todo.externalRef)
     });
-
     const todoMappings = createTodoMapping(
         userIntegration.user_integration_id,
         integrationResult.todos,
-        todos.map((row) => toTodo(row))
+        insertedTodos.map((row) => toTodo(row))
     );
-
     await todoMappingTable.bulkUpsert(db, todoMappings);
+
     await userIntegrationTable.update(db, userIntegration.user_id, userIntegration.integration_name, {
         status: IntegrationStatus.ACTIVE,
         integrationUserId: integrationResult.integrationUserId
@@ -92,6 +109,10 @@ const handleTodoAddedTask = async function (db: IDatabase<IClient>, params: stri
     const userIntegrations = await userIntegrationTable.find(db, todoAddedTaskParams.userId);
 
     for (const integration of userIntegrations) {
+        if (integration.status == IntegrationStatus.INACTIVE) {
+            continue;
+        }
+
         const todoMapping = await todoMappingTable.findOne(db, {
             userIntegrationId: integration.user_integration_id,
             todoId: todoAddedTaskParams.todoId
@@ -117,6 +138,10 @@ const handleTodoCompletedTask = async function (db: IDatabase<IClient>, params: 
     const userIntegrations = await userIntegrationTable.find(db, todoCompletedTaskParams.userId);
 
     for (const integration of userIntegrations) {
+        if (integration.status == IntegrationStatus.INACTIVE) {
+            continue;
+        }
+
         const todoMapping = await todoMappingTable.findOne(db, {
             userIntegrationId: integration.user_integration_id,
             todoId: todoCompletedTaskParams.todoId
