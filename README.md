@@ -6,7 +6,7 @@ The data is stored in the [PostgreSQL 15](https://www.postgresql.org/download/) 
 The server exposes [GraphQL](https://graphql.org/) API for managing TODOs:
 
 -   creating TODOs;
--   fetching TODOs;
+-   fetching TODOs (supports pagination for mitigating performance issues);
 -   completing TODOs;
 -   creating and fetching lists for TODOs;
 
