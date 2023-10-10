@@ -4,6 +4,7 @@ import {
     IntegrationName,
     UserIntegrationCreateParams,
     UserIntegrationDbRow,
+    UserIntegrationFilter,
     UserIntegrationUpdateParams
 } from "./userIntegration.js";
 import {isEmpty} from "../utils/common.js";
@@ -20,13 +21,19 @@ const findOne = async function (db: IDatabase<IClient>, userIntegrationId: numbe
     return db.oneOrNone<UserIntegrationDbRow>(query);
 };
 
-const find = async function (db: IDatabase<IClient>, userId: number, integrationName?: string) {
-    const integrationNameCondition = integrationName ? `AND integration_name = '${integrationName}'` : "";
+const find = async function (db: IDatabase<IClient>, where: UserIntegrationFilter) {
+    const userIdCondition = where.userId ? [`userId = ${where.userId}`] : [];
+    const integrationNameCondition = where.integrationName ? [`integration_name = '${where.integrationName}'`] : [];
+    const userIntegrationIdCondition = where.integrationName
+        ? [`user_integration_id= '${where.userIntegrationId}'`]
+        : [];
 
     const query = `
         SELECT user_integration_id, user_id, integration_name, access_token, parameters, status
         FROM ${TABLE_NAME}
-        WHERE user_id = ${userId} ${integrationNameCondition}
+        WHERE user_id = ${[...userIdCondition, ...integrationNameCondition, ...userIntegrationIdCondition].join(
+            " AND "
+        )}
     `;
 
     return db.manyOrNone<UserIntegrationDbRow>(query);

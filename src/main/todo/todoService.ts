@@ -8,6 +8,7 @@ import {
     TodoCreateParams,
     TodoFetchOptions,
     TodoFilter,
+    TodoUpsertParams,
     toTodo
 } from "./todo.js";
 import {listTable} from "../list/listTable.js";
@@ -36,7 +37,7 @@ const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCre
         logger.error(`Cannot create new todo: ${validation.error}`, {params: createParams});
         throw new Error(`Cannot create new todo: ${validation.error}`);
     }
-    const externalRef = createParams.external_ref ?? randomUUID();
+    const externalRef = createParams.externalRef ?? randomUUID();
 
     const id = await db.tx(async (transaction) => {
         const todoId = await todoTable.add(db, {...createParams, externalRef}, transaction);
@@ -51,6 +52,10 @@ const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCre
     });
 
     return todoService.getTodo(db, createParams.userId, id, true);
+};
+
+const upsertTodos = async function (db: IDatabase<IClient>, createParams: TodoUpsertParams[]) {
+    return todoTable.bulkUpsert(db, createParams);
 };
 
 const getTodo = async function (db: IDatabase<IClient>, userId: number, todoId: number, includeList?: boolean) {
@@ -109,5 +114,6 @@ export const todoService = {
     createTodo,
     getTodos,
     getTodo,
-    complete
+    complete,
+    upsertTodos
 };

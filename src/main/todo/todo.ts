@@ -7,7 +7,7 @@ export interface Todo {
     todoId: number;
     title: string;
     description: string;
-    completed_at?: tUnixTimestamp;
+    completedAt?: tUnixTimestamp;
     list?: List;
     userId: number;
     externalRef: string;
@@ -23,7 +23,14 @@ export interface TodoCreateParams {
     title: string;
     description?: string;
     listId?: number;
-    external_ref?: string;
+    externalRef?: string;
+}
+
+export interface TodoUpsertParams {
+    userId: number;
+    title: string;
+    description?: string;
+    externalRef: string;
 }
 
 export interface TodoCreateDbParams extends TodoCreateParams {
@@ -50,7 +57,7 @@ export interface TodoFilter {
     ids?: number[];
     status?: TodoStatus;
     listId?: number;
-    externalRef?: string[];
+    externalRefs?: string[];
 }
 
 export interface TodoFetchOptions {
@@ -63,7 +70,7 @@ export const toTodo = function (row: TodoDbRow): Todo {
         todoId: row.todo_id,
         title: row.title,
         description: row.description ?? "",
-        completed_at: row.completed_at ?? undefined,
+        completedAt: row.completed_at ?? undefined,
         list: row.list_id && row.list_name ? toList({list_id: row.list_id, name: row.list_name}) : undefined,
         userId: row.user_id,
         externalRef: row.external_ref

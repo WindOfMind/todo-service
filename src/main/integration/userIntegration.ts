@@ -50,3 +50,9 @@ export interface IntegrationSyncResult {
     todos: ExternalTodoCreateParams[];
     integrationUserId: string;
 }
+
+export interface UserIntegrationFilter {
+    userId?: number;
+    integrationName?: IntegrationName;
+    userIntegrationId?: string;
+}

@@ -17,7 +17,7 @@ const buildFilter = function (where: TodoFilter) {
     const listCondition = where.listId ? `AND list_id = ${where.listId}` : "";
     const statusCondition = buildStatusFilter(where.status);
     const idsCondition = where.ids ? `AND todo_id IN (${where.ids.join(",")})` : "";
-    const externalRefCondition = where.externalRef ? `AND external_ref IN (${where.externalRef.join(",")})` : "";
+    const externalRefCondition = where.externalRefs ? `AND external_ref IN (${where.externalRefs.join(",")})` : "";
 
     return `${statusCondition} ${idsCondition} ${listCondition} ${externalRefCondition}`.trim();
 };

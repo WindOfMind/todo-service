@@ -25,7 +25,10 @@ import {TodoStatus, toTodo} from "../todo/todo.js";
 const logger = Logger();
 
 const addUserIntegration = async function (db: IDatabase<IClient>, params: UserIntegrationCreateParams) {
-    const existingIntegration = await userIntegrationTable.find(db, params.userId, params.integrationName);
+    const existingIntegration = await userIntegrationTable.find(db, {
+        userId: params.userId,
+        integrationName: params.integrationName
+    });
     if (existingIntegration?.length > 0) {
         const message = `Failed to add integration: 
             integration ${params.integrationName} already exists for user ${params.userId}.`;
@@ -76,7 +79,7 @@ const handleInitialSyncTask = async function (db: IDatabase<IClient>, params: st
     const activeTodos = await todoTable.find(db, userIntegration.user_id, {
         status: TodoStatus.ACTIVE
     });
-    // TODO: optimise it - use bulk scheduling
+    // TODO: optimise it - use bulk scheduling in the production version
     await Promise.all(
         activeTodos.map(async (todo) =>
             taskScheduler.scheduleTask<TodoAddedTaskParameters>(db, TaskName.TODO_ADDED, {
@@ -89,7 +92,7 @@ const handleInitialSyncTask = async function (db: IDatabase<IClient>, params: st
     const integrationResult = await initialSyncHandler[userIntegration.integration_name](userIntegration);
     await todoTable.bulkUpsert(db, integrationResult.todos);
     const insertedTodos = await todoTable.find(db, userIntegration.user_id, {
-        externalRef: integrationResult.todos.map((todo) => todo.externalRef)
+        externalRefs: integrationResult.todos.map((todo) => todo.externalRef)
     });
     const todoMappings = createTodoMapping(
         userIntegration.user_integration_id,
@@ -106,7 +109,7 @@ const handleInitialSyncTask = async function (db: IDatabase<IClient>, params: st
 
 const handleTodoAddedTask = async function (db: IDatabase<IClient>, params: string) {
     const todoAddedTaskParams = JSON.parse(params) as TodoAddedTaskParameters;
-    const userIntegrations = await userIntegrationTable.find(db, todoAddedTaskParams.userId);
+    const userIntegrations = await userIntegrationTable.find(db, {userId: todoAddedTaskParams.userId});
 
     for (const integration of userIntegrations) {
         if (integration.status == IntegrationStatus.INACTIVE) {
@@ -119,7 +122,7 @@ const handleTodoAddedTask = async function (db: IDatabase<IClient>, params: stri
         });
 
         if (todoMapping) {
-            logger.notice("Added todo already synced", {todoAddedTaskParams, integration});
+            logger.notice("Added todo is already synced", {todoAddedTaskParams, integration});
             continue;
         }
 
@@ -135,7 +138,7 @@ const handleTodoAddedTask = async function (db: IDatabase<IClient>, params: stri
 
 const handleTodoCompletedTask = async function (db: IDatabase<IClient>, params: string) {
     const todoCompletedTaskParams = JSON.parse(params) as TodoCompletedTaskParameters;
-    const userIntegrations = await userIntegrationTable.find(db, todoCompletedTaskParams.userId);
+    const userIntegrations = await userIntegrationTable.find(db, {userId: todoCompletedTaskParams.userId});
 
     for (const integration of userIntegrations) {
         if (integration.status == IntegrationStatus.INACTIVE) {
