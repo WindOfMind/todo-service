@@ -6,16 +6,18 @@ import {
     TodoistItemCompletedEventData,
     createTodoExternalRef,
     TodoistEventName
-} from "./todoist";
-import {userIntegrationTable} from "../userIntegrationTable";
-import {Logger} from "../../logger";
-import {IntegrationName} from "../userIntegration";
-import {todoMappingTable} from "../todoMappingTable";
-import {todoService} from "../../todo/todoService";
+} from "./todoist.js";
+import {userIntegrationTable} from "../userIntegrationTable.js";
+import {Logger} from "../../logger.js";
+import {IntegrationName} from "../userIntegration.js";
+import {todoMappingTable} from "../todoMappingTable.js";
+import {todoService} from "../../todo/todoService.js";
 
 const logger = Logger();
 
 const handleTodoistUpdate = async function (db: IDatabase<IClient>, payload: TodoistUpdatePayload) {
+    logger.info("Received Todoist update", payload);
+
     const userIntegration = await userIntegrationTable.find(db, {
         userIntegrationId: payload.user_id,
         integrationName: IntegrationName.TODOIST

@@ -22,18 +22,17 @@ const findOne = async function (db: IDatabase<IClient>, userIntegrationId: numbe
 };
 
 const find = async function (db: IDatabase<IClient>, where: UserIntegrationFilter) {
-    const userIdCondition = where.userId ? [`userId = ${where.userId}`] : [];
+    const userIdCondition = where.userId !== undefined ? [`userId = ${where.userId}`] : [];
     const integrationNameCondition = where.integrationName ? [`integration_name = '${where.integrationName}'`] : [];
     const userIntegrationIdCondition = where.integrationName
         ? [`user_integration_id= '${where.userIntegrationId}'`]
         : [];
+    const filter = [...userIdCondition, ...integrationNameCondition, ...userIntegrationIdCondition].join(" AND ");
 
     const query = `
         SELECT user_integration_id, user_id, integration_name, access_token, parameters, status
         FROM ${TABLE_NAME}
-        WHERE user_id = ${[...userIdCondition, ...integrationNameCondition, ...userIntegrationIdCondition].join(
-            " AND "
-        )}
+        WHERE ${filter}
     `;
 
     return db.manyOrNone<UserIntegrationDbRow>(query);

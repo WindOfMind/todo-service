@@ -7,7 +7,6 @@
     "module": "ESNext",   
     "moduleResolution": "Node", 
     "rootDirs": ["src"],                          
-    // "outDir": "dist",
     "lib": ["es2020"],
     "esModuleInterop": true,                             
     "forceConsistentCasingInFileNames": true,         

@@ -1,4 +1,4 @@
-import express, {Express} from "express";
+import express, {Express, Request, Response} from "express";
 import http from "http";
 import {expressMiddleware} from "@apollo/server/express4";
 import {ApolloServerPluginDrainHttpServer} from "@apollo/server/plugin/drainHttpServer";
@@ -12,6 +12,7 @@ import {AppContext} from "./context.js";
 import "dotenv/config";
 import {taskRunner} from "./task/taskRunner.js";
 import {Logger} from "./logger.js";
+import {todoistWebhookService} from "./integration/todoist/todoistWebhookService.js";
 
 const logger = Logger();
 const app: Express = express();
@@ -35,6 +36,12 @@ app.use(
         context: async () => ({db})
     })
 );
+
+app.post("/webhook/todoist/update", bodyParser.json(), (req: Request, res: Response) => {
+    //TODO: auth & authz should be added here - validate headers using client secret
+    todoistWebhookService.handleTodoistUpdate(db, req.body);
+    res.send("OK");
+});
 
 await new Promise<void>((resolve) => httpServer.listen({port: 4000}, resolve));
 logger.info(`🚀 Server ready at http://localhost:4000/graphql`);

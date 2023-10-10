@@ -1,4 +1,4 @@
-import {ExternalTodoCreateParams, IntegrationName} from "../userIntegration";
+import {ExternalTodoCreateParams, IntegrationName} from "../userIntegration.js";
 
 export interface TodoistItem {
     id: string;
