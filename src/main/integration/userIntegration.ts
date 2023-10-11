@@ -28,7 +28,7 @@ export enum IntegrationStatus {
 export interface UserIntegrationUpdateParams {
     parameters?: string | null;
     status?: IntegrationStatus;
-    integrationUserId?: string;
+    externalUserId?: string;
 }
 
 export interface UserIntegrationDbRow {
@@ -38,7 +38,7 @@ export interface UserIntegrationDbRow {
     integration_name: IntegrationName;
     parameters: string | null;
     status: IntegrationStatus;
-    integration_user_id: string | null;
+    external_user_id: string | null;
 }
 
 export interface ExternalTodoCreateParams extends TodoCreateParams {
@@ -54,5 +54,5 @@ export interface IntegrationSyncResult {
 export interface UserIntegrationFilter {
     userId?: number;
     integrationName?: IntegrationName;
-    userIntegrationId?: string;
+    externalUserId?: string;
 }

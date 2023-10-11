@@ -24,13 +24,11 @@ const findOne = async function (db: IDatabase<IClient>, userIntegrationId: numbe
 const find = async function (db: IDatabase<IClient>, where: UserIntegrationFilter) {
     const userIdCondition = where.userId !== undefined ? [`user_id = ${where.userId}`] : [];
     const integrationNameCondition = where.integrationName ? [`integration_name = '${where.integrationName}'`] : [];
-    const userIntegrationIdCondition = where.userIntegrationId
-        ? [`integration_user_id = '${where.userIntegrationId}'`]
-        : [];
-    const filter = [...userIdCondition, ...integrationNameCondition, ...userIntegrationIdCondition].join(" AND ");
+    const externalUserIdCondition = where.externalUserId ? [`external_user_id = '${where.externalUserId}'`] : [];
+    const filter = [...userIdCondition, ...integrationNameCondition, ...externalUserIdCondition].join(" AND ");
 
     const query = `
-        SELECT user_integration_id, user_id, integration_name, access_token, parameters, status, integration_user_id
+        SELECT user_integration_id, user_id, integration_name, access_token, parameters, status, external_user_id
         FROM ${TABLE_NAME}
         WHERE ${filter}
     `;
@@ -61,13 +59,11 @@ const update = async function (
 
     const statusUpdate = update.status ? [`status = '${update.status}'`] : [];
     const parametersUpdate = update.parameters ? [`parameters = '${update.parameters}'`] : [];
-    const integrationUserIdUpdate = update.integrationUserId
-        ? [`integration_user_id = '${update.integrationUserId}'`]
-        : [];
+    const externalUserIdUpdate = update.externalUserId ? [`external_user_id = '${update.externalUserId}'`] : [];
 
     const query = `
         UPDATE ${TABLE_NAME} 
-        SET ${[...statusUpdate, ...parametersUpdate, ...integrationUserIdUpdate].join(",")}
+        SET ${[...statusUpdate, ...parametersUpdate, ...externalUserIdUpdate].join(",")}
         WHERE user_id = ${userId} AND integration_name = '${integrationName}'
     `;
 

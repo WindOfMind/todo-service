@@ -82,7 +82,7 @@ const handleInitialSyncTask = async function (db: IDatabase<IClient>, params: st
 
     await userIntegrationTable.update(db, userIntegration.user_id, userIntegration.integration_name, {
         status: IntegrationStatus.ACTIVE,
-        integrationUserId: integrationUserId
+        externalUserId: integrationUserId
     });
 };
 

@@ -19,7 +19,7 @@ const handleTodoistUpdate = async function (db: IDatabase<IClient>, payload: Tod
     logger.info("Received Todoist update", payload);
 
     const userIntegration = await userIntegrationTable.find(db, {
-        userIntegrationId: payload.user_id,
+        externalUserId: payload.user_id,
         integrationName: IntegrationName.TODOIST
     });
 
