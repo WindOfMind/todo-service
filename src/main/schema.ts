@@ -1,7 +1,8 @@
+import {userIntegrationMutations, userIntegrationTypeDefs} from "./integration/schema.js";
 import {listMutations, listQueries, listTypeDefs} from "./list/schema.js";
 import {todoChildren, todoMutations, todoQueries, todoTypeDefs} from "./todo/schema.js";
 
-export const typeDefs = [todoTypeDefs, listTypeDefs].join("");
+export const typeDefs = [todoTypeDefs, listTypeDefs, userIntegrationTypeDefs].join("");
 
 export const resolvers = {
     Query: {
@@ -10,7 +11,8 @@ export const resolvers = {
     },
     Mutation: {
         ...todoMutations,
-        ...listMutations
+        ...listMutations,
+        ...userIntegrationMutations
     },
     ...todoChildren
 };
