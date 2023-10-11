@@ -1,6 +1,6 @@
 export interface Pagination {
     first?: number;
-    after?: string;
+    after?: string; // currently todoId is used here
 }
 
 export interface Edge<T> {

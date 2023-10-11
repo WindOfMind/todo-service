@@ -55,6 +55,7 @@ const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCre
 };
 
 const upsertTodos = async function (db: IDatabase<IClient>, createParams: TodoUpsertParams[]) {
+    //TODO: upsert TODOs in chunks to avoid overloading the DB
     return todoTable.bulkUpsert(db, createParams);
 };
 

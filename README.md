@@ -59,7 +59,7 @@ Idempotency is achieved by using `external_ref` value of each TODO as an idempot
 
 -   Run `npm start` in the terminal.
 
-### Test run
+### Tests
 
 Currently, only spec (testing pure static logic without side-effect, e.g. DB updates) tests are presented.
 Ideally, component tests (run a service and treat it as a black box) should be added as well

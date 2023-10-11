@@ -3,6 +3,7 @@ import {IntegrationSyncResult, UserIntegrationDbRow} from "../userIntegration.js
 import {TodoAddedTaskParameters, TodoCompletedTaskParameters} from "../../task/task.js";
 import {randomUUID} from "crypto";
 import {toTodo} from "./todoist.js";
+import {Todo} from "../../todo/todo.js";
 
 const handleInitialSync = async function (params: UserIntegrationDbRow): Promise<IntegrationSyncResult> {
     // call the todoist api https://developer.todoist.com/sync/v9/#sync for full sync here
@@ -25,11 +26,9 @@ const handleInitialSync = async function (params: UserIntegrationDbRow): Promise
     return {integrationUserId: response.user.user_id, todos: response.items.map((i) => toTodo(i, params.user_id))};
 };
 
-const handleTodoAdded = async function (
-    userIntegrationParams: UserIntegrationDbRow,
-    todoParams: TodoAddedTaskParameters
-) {
+const handleTodoAdded = async function (userIntegrationParams: UserIntegrationDbRow, todo: Todo) {
     // call todoist api using access and sync tokens for incremental sync
+    // use Todo external ref + operation type as an idempotency token to avoid duplication in 3rd party service.
 
     return randomUUID();
 };
@@ -37,9 +36,10 @@ const handleTodoAdded = async function (
 const handleTodoCompleted = async function (
     externalItemId: string,
     userIntegrationParams: UserIntegrationDbRow,
-    todoParams: TodoCompletedTaskParameters
+    todo: Todo
 ) {
     // call todoist api using access and sync tokens for incremental sync
+    // use Todo external ref + operation type as an idempotency token to avoid duplication in 3rd party service.
 };
 
 export const todoistClient = {
