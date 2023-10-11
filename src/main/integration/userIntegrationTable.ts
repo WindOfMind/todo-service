@@ -22,15 +22,15 @@ const findOne = async function (db: IDatabase<IClient>, userIntegrationId: numbe
 };
 
 const find = async function (db: IDatabase<IClient>, where: UserIntegrationFilter) {
-    const userIdCondition = where.userId !== undefined ? [`userId = ${where.userId}`] : [];
+    const userIdCondition = where.userId !== undefined ? [`user_id = ${where.userId}`] : [];
     const integrationNameCondition = where.integrationName ? [`integration_name = '${where.integrationName}'`] : [];
-    const userIntegrationIdCondition = where.integrationName
-        ? [`user_integration_id= '${where.userIntegrationId}'`]
+    const userIntegrationIdCondition = where.userIntegrationId
+        ? [`integration_user_id = '${where.userIntegrationId}'`]
         : [];
     const filter = [...userIdCondition, ...integrationNameCondition, ...userIntegrationIdCondition].join(" AND ");
 
     const query = `
-        SELECT user_integration_id, user_id, integration_name, access_token, parameters, status
+        SELECT user_integration_id, user_id, integration_name, access_token, parameters, status, integration_user_id
         FROM ${TABLE_NAME}
         WHERE ${filter}
     `;
@@ -40,7 +40,7 @@ const find = async function (db: IDatabase<IClient>, where: UserIntegrationFilte
 
 const add = async function (db: IDatabase<IClient>, params: UserIntegrationCreateParams, transaction?: ITask<IClient>) {
     const query = `
-        INSERT INTO ${TABLE_NAME}}(user_id, integration_name, access_token)
+        INSERT INTO ${TABLE_NAME}(user_id, integration_name, access_token)
         VALUES ($1, $2, $3) RETURNING user_integration_id
     `;
 

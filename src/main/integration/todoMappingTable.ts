@@ -7,7 +7,7 @@ const TABLE_NAME = "todo_mapping";
 const add = async function (db: IDatabase<IClient>, params: TodoMappingCreateParams) {
     const query = `
         INSERT INTO ${TABLE_NAME}(todo_id, external_item_id, user_integration_id)
-        VALUES ($1, $2, $3) RETUNING todo_mapping_id
+        VALUES ($1, $2, $3) RETURNING todo_mapping_id
     `;
 
     const values = [params.todoId, params.externalItemId, params.userIntegrationId];

@@ -39,7 +39,7 @@ const init = function (db: IDatabase<IClient>, interval: number) {
         try {
             await run(db);
         } catch (e) {
-            logger.error("Failed to run the task", e);
+            logger.error("Failed to run the task", {error: e});
         }
     }, interval);
 };

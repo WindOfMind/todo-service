@@ -38,7 +38,7 @@ export interface UserIntegrationDbRow {
     integration_name: IntegrationName;
     parameters: string | null;
     status: IntegrationStatus;
-    integration_user_id: string;
+    integration_user_id: string | null;
 }
 
 export interface ExternalTodoCreateParams extends TodoCreateParams {

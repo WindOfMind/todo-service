@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS user_integration (
     user_id bigint NOT NUll,
     integration_name varchar(100) NOT NULL,
     access_token varchar(512) NOT NULL,
-    integration_user_id varchar(512) NOT NULL,
+    integration_user_id varchar(512),
     parameters TEXT,
     status varchar(100) DEFAULT 'pending' NOT NULL,
     created_at timestamptz NOT NULL DEFAULT now(),

@@ -27,6 +27,8 @@ const logger = Logger();
 const CHUNK_SIZE = 1000;
 
 const addUserIntegration = async function (db: IDatabase<IClient>, params: UserIntegrationCreateParams) {
+    logger.info("Adding new user integration", params);
+
     const existingIntegration = await userIntegrationTable.find(db, {
         userId: params.userId,
         integrationName: params.integrationName
@@ -85,6 +87,8 @@ const handleInitialSyncTask = async function (db: IDatabase<IClient>, params: st
 };
 
 const scheduleExistingTodosTask = async function (db: IDatabase<IClient>, userId: number) {
+    logger.info("Scheduling existing todos to be synced", {userId});
+
     let cursor = undefined;
 
     while (cursor !== "") {
@@ -117,11 +121,12 @@ const scheduleExistingTodosTask = async function (db: IDatabase<IClient>, userId
 };
 
 const syncExternalTodos = async function (db: IDatabase<IClient>, userIntegration: UserIntegrationDbRow) {
+    logger.info("Syncing external todos", userIntegration);
+
     const integrationResult = await initialSyncHandler[userIntegration.integration_name](userIntegration);
     await todoService.upsertTodos(db, integrationResult.todos);
 
     let cursor = undefined;
-
     while (cursor !== "") {
         const response = await todoService.getTodos(
             db,
@@ -142,7 +147,10 @@ const syncExternalTodos = async function (db: IDatabase<IClient>, userIntegratio
             integrationResult.todos,
             response.edges.map((edge) => edge.node)
         );
-        await todoMappingTable.bulkUpsert(db, todoMappings);
+
+        if (todoMappings.length) {
+            await todoMappingTable.bulkUpsert(db, todoMappings);
+        }
 
         cursor = response.endCursor;
     }
@@ -164,13 +172,18 @@ const handleTodoAddedTask = async function (db: IDatabase<IClient>, params: stri
             continue;
         }
 
+        if (integration.status == IntegrationStatus.PENDING) {
+            logger.error("Integration should be init first", integration);
+            throw new Error("Integration should be init first");
+        }
+
         const todoMapping = await todoMappingTable.findOne(db, {
             userIntegrationId: integration.user_integration_id,
             todoId: todoAddedTaskParams.todoId
         });
 
         if (todoMapping) {
-            logger.notice("Added todo is already synced", {todoAddedTaskParams, integration});
+            logger.info("Added todo is already synced", {todoAddedTaskParams, integration});
             continue;
         }
 
@@ -196,6 +209,11 @@ const handleTodoCompletedTask = async function (db: IDatabase<IClient>, params: 
     for (const integration of userIntegrations) {
         if (integration.status == IntegrationStatus.INACTIVE) {
             continue;
+        }
+
+        if (integration.status == IntegrationStatus.PENDING) {
+            logger.error("Integration should be init first", integration);
+            throw new Error("Integration should be init first");
         }
 
         const todoMapping = await todoMappingTable.findOne(db, {

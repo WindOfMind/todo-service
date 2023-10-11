@@ -23,11 +23,10 @@ export const createTodoMapping = function (
     createParams: ExternalTodoCreateParams[],
     todos: Array<{todoId: number; externalRef: string}>
 ): TodoMappingCreateParams[] {
-    const externalIdMap = new Map(createParams.map((params) => [params.externalId, params.externalRef]));
+    const externalIdMap = new Map(createParams.map((params) => [params.externalRef, params.externalId]));
 
     return todos.map((todo) => {
         const externalId = externalIdMap.get(todo.externalRef);
-
         if (!externalId) {
             throw new Error(`Failed to find external id for todo ${todo.todoId}`);
         }

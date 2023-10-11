@@ -14,7 +14,7 @@ export const userIntegrationTypeDefs = `#graphql
 
 interface AddUserIntegrationRequest {
     userId: number;
-    name: IntegrationName;
+    integrationName: IntegrationName;
     accessToken: string;
 }
 
@@ -22,9 +22,8 @@ interface AddUserIntegrationRequest {
 export const userIntegrationMutations = {
     addUserIntegration: (_: unknown, args: AddUserIntegrationRequest, contextValue: AppContext) => {
         return userIntegrationService.addUserIntegration(contextValue.db, {
-            userId: args.userId,
-            integrationName: args.name,
-            accessToken: args.accessToken
+            ...args,
+            integrationName: args.integrationName.toLowerCase() as IntegrationName
         });
     }
 };

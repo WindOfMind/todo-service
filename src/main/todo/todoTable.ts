@@ -10,14 +10,16 @@ const buildStatusFilter = function (status?: TodoStatus) {
         return "";
     }
 
-    return status == TodoStatus.ACTIVE ? "AND completed_at = NULL" : `AND completed_at != NULL`;
+    return status == TodoStatus.ACTIVE ? "AND completed_at IS NULL" : `AND completed_at != NULL`;
 };
 
 const buildFilter = function (where: TodoFilter) {
     const listCondition = where.listId ? `AND list_id = ${where.listId}` : "";
     const statusCondition = buildStatusFilter(where.status);
     const idsCondition = where.ids ? `AND todo_id IN (${where.ids.join(",")})` : "";
-    const externalRefCondition = where.externalRefs ? `AND external_ref IN (${where.externalRefs.join(",")})` : "";
+    const externalRefCondition = where.externalRefs
+        ? `AND external_ref IN (${where.externalRefs.map((r) => `'${r}'`).join(",")})`
+        : "";
 
     return `${statusCondition} ${idsCondition} ${listCondition} ${externalRefCondition}`.trim();
 };
@@ -44,7 +46,7 @@ const find = async function (
     const listSelect = options?.includeList ? ", l.list_id, l.name as list_name" : "";
 
     const query = `
-        SELECT t.todo_id, t.title, t.description, extract(epoch FROM t.completed_at), t.user_id, t.external_ref ${listSelect}
+        SELECT t.todo_id, t.title, t.description, extract(epoch FROM t.completed_at) as completed_at, t.user_id, t.external_ref ${listSelect}
         FROM ${TABLE_NAME} t ${join}
         WHERE t.user_id = ${userId} ${filter} ${cursor}
         ${limit}
