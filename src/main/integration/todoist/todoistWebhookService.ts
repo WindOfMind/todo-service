@@ -24,7 +24,7 @@ const handleTodoistUpdate = async function (db: IDatabase<IClient>, payload: Tod
     });
 
     if (!userIntegration.length) {
-        logger.error("Integration user id is not found", {userId: payload.user_id});
+        logger.error("External user id is not found", {userId: payload.user_id});
         return;
     }
 

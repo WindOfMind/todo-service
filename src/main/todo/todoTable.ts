@@ -42,7 +42,7 @@ const find = async function (
     const cursor = options?.pagination?.after
         ? db.$config.pgp.as.format("AND t.todo_id > $1 ", options.pagination.after)
         : "";
-    const join = options?.includeList ? "JOIN list l ON t.list_id = l.list_id" : "";
+    const join = options?.includeList ? "LEFT JOIN list l ON t.list_id = l.list_id" : "";
     const listSelect = options?.includeList ? ", l.list_id, l.name as list_name" : "";
 
     const query = `
