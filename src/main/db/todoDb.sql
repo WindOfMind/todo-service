@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS user_integration (
     UNIQUE(user_id, integration_name)
 );
 
-CREATE INDEX integration_user_id_idx ON user_integration (integration_user_id);
+CREATE INDEX integration_user_id_idx ON user_integration (external_user_id);
 
 CREATE TABLE IF NOT EXISTS todo_mapping(
     todo_mapping_id bigserial PRIMARY KEY,
