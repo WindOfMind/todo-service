@@ -8,12 +8,20 @@ The server exposes [GraphQL](https://graphql.org/) API for managing TODOs:
 -   creating TODOs;
 -   fetching TODOs (supports cursor-based pagination for mitigating performance issues);
 -   completing TODOs;
--   creating and fetching lists for TODOs;
+-   creating and fetching lists for TODOs - TODOs can be grouped in lists;
 -   adding user integration with 3rd party service (for testing purpose on;y at the moment).
 
 Calling `/graphql` endpoint during the local run will present a UI for testing these endpoints locally.
 
 Also, webhooks are exposed for accepting updates from 3rd party service, e.g. `/webhook/todoist/update` endpoint.
+
+## Performance concerns
+
+To support frequent and often query operations corresponding indices were introduced in the DB.
+
+Since it is expected that the amount of todos can be huge the cursor-based pagination is presented when fetching the active todos from the service.
+
+Some heavy operation that can affect user's experience (like 3P sync) are made asynchronous (based on emitted tasks).
 
 ## Security concerns
 
