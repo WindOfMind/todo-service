@@ -34,6 +34,9 @@ In the current implementation the `user id` is accepted as a request parameter t
 though in the production version we will get in from the validated access token.
 All updates that comes from the 3rd party via webhooks should be also validated using the client secret and hash values in the headers.
 
+Also, the best security practices should be applied to the production version to prevent a leak of the personal/sensitive information,
+e.g. defense from the injection attacks.
+
 ## Integration with other third-party services
 
 This project includes functionality for integrating with other TODO services (e.g. [todoist](https://todoist.com/)).
