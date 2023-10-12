@@ -42,6 +42,32 @@ The todo service has webhooks that should be registered in the 3rd party system 
 -   updating 3p service whenever update happens in our service based on a created task for that - done automatically based on the created task whenever update happens in the todo service;
 -   receiving any updates from the 3p service by exposing dedicated webhooks.
 
+Example of calling webhook endpoint `webhook/todoist/update` with an update for completing the item (`POST`):
+
+```
+{
+    "user_id": "2343243",
+    "event_name": "item:completed",
+    "event_data": {
+        "id": "2343df243"
+    }
+}
+```
+
+or adding a new item
+
+```
+{
+    "user_id": "2343243",
+    "event_name": "item:added",
+    "event_data": {
+        "id": "2343df243",
+        "content": "Buy smth",
+        "description": "dsfd"
+    }
+}
+```
+
 If any task fails it will be safe to retry as all handlers should be implemented in the retry-safe way.
 Idempotency is achieved by using `external_ref` value of each TODO as an idempotency token when fetching update from the 3rd party and in the requests for the 3rd party services updates.
 
