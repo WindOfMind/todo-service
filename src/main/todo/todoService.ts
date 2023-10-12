@@ -39,6 +39,7 @@ const createTodo = async function (db: IDatabase<IClient>, createParams: TodoCre
     }
     const externalRef = createParams.externalRef ?? randomUUID();
 
+    // outbox pattern is used to ensure that task is emitted only when DB update was successful
     const id = await db.tx(async (transaction) => {
         const todoId = await todoTable.add(db, {...createParams, externalRef}, transaction);
         await taskScheduler.scheduleTask<TodoAddedTaskParameters>(
