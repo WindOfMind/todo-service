@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS user_integration (
     integration_name varchar(100) NOT NULL,
     access_token varchar(512) NOT NULL,
     external_user_id varchar(512),
-    parameters TEXT,
+    parameters text,
     status varchar(100) DEFAULT 'pending' NOT NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
@@ -57,7 +57,7 @@ CREATE INDEX todo_id_idx ON todo_mapping (todo_id);
 CREATE TABLE IF NOT EXISTS task (
     task_id bigserial PRIMARY KEY,
     name varchar(512),
-    parameters TEXT, -- serialized JSON with custom parameters
+    parameters text, -- serialized JSON with custom parameters
     status varchar(100) DEFAULT 'pending',
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
