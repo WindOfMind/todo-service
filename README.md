@@ -9,7 +9,7 @@ The server exposes [GraphQL](https://graphql.org/) API for managing TODOs:
 -   fetching TODOs (supports cursor-based pagination for mitigating performance issues);
 -   completing TODOs;
 -   creating and fetching lists for TODOs - TODOs can be grouped in lists;
--   adding user integration with 3rd party service (for testing purpose on;y at the moment).
+-   adding user integration with 3rd party service (for testing purpose only at the moment).
 
 Calling `/graphql` endpoint during the local run will present a UI for testing these endpoints locally.
 
