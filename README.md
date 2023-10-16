@@ -86,6 +86,14 @@ Note: it is important to provide idempotency for 3P sync operations to avoid dup
 
 Note: rate limiting is omitted in this implementation but must be introduces in the production version to avoid disrupting the 3rd party services.
 
+### How to test integration locally
+
+1. Add user integration using the `addUserIntegration` mutation for specified `userId`.
+2. Once the integration added this user will receive a new TODO(s) in the todo service after the initial sync.
+3. All existing TODOs will be sent to this integration as well (can be tracked in the logs).
+4. It is possible to simulate an update from 3rd party service by calling `webhook/todoist/update` webhook.
+5. All updates (creating and completing) done in the todo service will be automatically sent to integrated 3rd party service (can be tracked in the logs).
+
 ## How to run locally
 
 ### Requirements
